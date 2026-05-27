@@ -67,14 +67,14 @@
             <i class="fa-solid fa-graduation-cap text-[#f59e0b]"></i>
             班級經營互動看板
         </h1>
-        <p class="text-gray-500 text-xs md:text-[12px]">　　　 互動式行為表現與計時器、作業檢核系統</p>
+        <p class="text-gray-500 text-xs md:text-[12px]">互動式行為表現與計時器、作業檢核系統</p>
     </header>
 
-    <!-- 網頁主要三大區塊版面：橫式 3 欄等高佈局 (在桌面端固定高度，確保整齊對稱) -->
-    <main class="grid grid-cols-1 md:grid-cols-3 gap-5 md:h-[580px] shrink-0 min-h-0 mb-6">
+    <!-- 網頁主要三大區塊版面：橫式 3 欄等高佈局 (調整為 3:5:4 比例，計時器寬度加寬，中欄表現記錄區適度微調) -->
+    <main class="grid grid-cols-1 md:grid-cols-12 gap-5 md:h-[580px] shrink-0 min-h-0 mb-6">
         
-        <!-- 左欄：學生姓名區 -->
-        <section class="flex flex-col h-full min-h-0">
+        <!-- 左欄：學生姓名區 (佔 12 格中的 3 格) -->
+        <section class="md:col-span-3 flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0">
                 <!-- 區塊標題 -->
                 <h2 class="text-lg font-bold text-[#78350f] mb-2.5 flex items-center justify-between shrink-0">
@@ -125,8 +125,8 @@
             </div>
         </section>
 
-        <!-- 中欄：表現記錄區 (好表現區與待改進區左右並列) -->
-        <section class="flex flex-col h-full min-h-0">
+        <!-- 中欄：表現記錄區 (佔 12 格中的 5 格，適度加寬保留大名牌空間) -->
+        <section class="md:col-span-5 flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0 gap-3">
                 <!-- 區塊標題 -->
                 <h2 class="text-lg font-bold text-[#78350f] shrink-0 flex items-center gap-2">
@@ -169,8 +169,8 @@
             </div>
         </section>
 
-        <!-- 右欄：計時器專區 -->
-        <section class="flex flex-col h-full min-h-0">
+        <!-- 右欄：計時器專區 (佔 12 格中的 4 格，寬度加寬) -->
+        <section class="md:col-span-4 flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full justify-between bg-gradient-to-b from-white to-[#fffbeb] min-h-0 overflow-y-auto">
                 <div>
                     <!-- 區塊標題 -->
@@ -193,17 +193,17 @@
                     <div class="flex items-center justify-center gap-1.5 mb-3 bg-amber-50 p-2 rounded-xl border border-amber-100 shrink-0">
                         <div class="flex flex-col items-center">
                             <span class="text-[9px] text-gray-400 mb-0.5">小時</span>
-                            <input type="number" id="input-hours" min="0" max="23" value="0" class="w-10 text-center text-sm font-bold border border-amber-200 rounded-lg p-0.5 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <input type="number" id="input-hours" min="0" max="23" value="0" class="w-12 text-center text-sm font-bold border border-amber-200 rounded-lg p-0.5 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                         <span class="text-sm font-bold text-amber-500 mt-2">:</span>
                         <div class="flex flex-col items-center">
                             <span class="text-[9px] text-gray-400 mb-0.5">分鐘</span>
-                            <input type="number" id="input-minutes" min="0" max="99" value="4" class="w-10 text-center text-sm font-bold border border-amber-200 rounded-lg p-0.5 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <input type="number" id="input-minutes" min="0" max="99" value="4" class="w-12 text-center text-sm font-bold border border-amber-200 rounded-lg p-0.5 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                         <span class="text-sm font-bold text-amber-500 mt-2">:</span>
                         <div class="flex flex-col items-center">
                             <span class="text-[9px] text-gray-400 mb-0.5">秒數</span>
-                            <input type="number" id="input-seconds" min="0" max="59" value="0" class="w-10 text-center text-sm font-bold border border-amber-200 rounded-lg p-0.5 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <input type="number" id="input-seconds" min="0" max="59" value="0" class="w-12 text-center text-sm font-bold border border-amber-200 rounded-lg p-0.5 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                         <button onclick="applyInputTime()" class="ml-1 bg-amber-200 hover:bg-amber-300 text-amber-950 font-semibold text-[11px] py-1 px-2 rounded-lg transition-all mt-3">
                             設定
@@ -245,7 +245,7 @@
                 <!-- 新增作業輸入列 -->
                 <div class="flex items-center gap-2 bg-amber-50 p-1.5 rounded-xl border border-amber-100 max-w-lg w-full">
                     <input type="text" id="hw-name-input" placeholder="請打字輸入作業名稱 (例如：國習、數單)" class="flex-grow text-sm bg-white border border-amber-200 rounded-lg py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
-                    <button onclick="addHomeworkItem()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-1.5 px-4 rounded-lg transition-all shadow-sm shrink-0">
+                    <button onclick="addHomeworkItem()" class="bg-amber-500 hover:bg-emerald-600 text-white font-bold text-sm py-1.5 px-4 rounded-lg transition-all shadow-sm shrink-0">
                         <i class="fa-solid fa-plus mr-1"></i>新增作業
                     </button>
                 </div>
@@ -440,13 +440,14 @@
             });
         }
 
-        // 7. 創建單一學生方塊 DOM 元素
+        // 7. 創建單一學生方塊 DOM 元素 (學生姓名區恢復為原始的較小字體與緊密間距)
         function createStudentCard(number, name) {
             totalCreatedCount++;
             const uniqueId = `student-${totalCreatedCount}`;
 
             const card = document.createElement('div');
             card.id = uniqueId;
+            // 恢復原本輕巧好排印的 text-xs 與 py-2 px-2.5 間距
             card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-2.5 rounded-xl flex items-center gap-1.5 cursor-grab active:cursor-grabbing select-none transition-all text-xs font-semibold relative";
             card.setAttribute('draggable', 'true');
             card.setAttribute('data-number', number);
@@ -456,8 +457,9 @@
             const isEven = parseInt(number) % 2 === 0;
             const bgClass = isEven ? 'bg-amber-50 text-amber-800' : 'bg-orange-50 text-orange-800';
             
+            // 恢復原始的 w-5 h-5 迷你座號與字重 font-bold
             card.innerHTML = `
-                <span class="w-5 h-5 flex items-center justify-center rounded-full text-[9px] font-bold ${bgClass} shrink-0">
+                <span class="w-5 h-5 flex items-center justify-center rounded-full text-[9px] font-bold ${bgClass} shrink-0 shadow-sm">
                     ${number}
                 </span>
                 <span class="truncate text-amber-950 font-bold">${name}</span>
@@ -669,22 +671,38 @@
             cards.forEach(card => zone.appendChild(card));
         }
 
-        // 進入表現區後，賦予卡片固定的寬度與高度，並設定垃圾桶按鈕滑鼠懸停時在右側邊緣浮現
+        // 當學生方塊被拖移至表現記錄區時，整體放大一點點 (寬度 w-40, 高度 h-12, 名字升級為 text-base md:text-lg)
         function moveCardToZone(card, zone) {
             const placeholder = zone.querySelector('.placeholder');
             if (placeholder) {
                 placeholder.style.display = 'none';
             }
             
-            card.classList.remove('py-2', 'px-2.5');
-            // 為卡片加上固定的寬高，並加上 group，方便子元素使用 group-hover 做出懸停效果
-            card.classList.add('py-1', 'px-1.5', 'text-[11px]', 'shadow-sm', 'w-28', 'h-9', 'shrink-0', 'mx-auto', 'justify-self-center', 'group');
+            // 先清理原來的緊密微型樣式
+            card.classList.remove('py-2', 'px-2.5', 'text-xs');
+            
+            // 表現區「整體放大」樣式設定：寬度加長至 w-40 (160px)、高度 h-12 (48px)、內距與字體同步放大為 text-base md:text-lg，視覺張力更佳！
+            card.classList.add('py-2', 'px-3.5', 'text-base', 'md:text-lg', 'shadow-md', 'w-40', 'h-12', 'shrink-0', 'mx-auto', 'justify-self-center', 'group');
+
+            // 同步放大座號圓圈及圓圈內字級 (w-7 h-7, text-sm font-black)
+            const numSpan = card.querySelector('span:first-child');
+            if (numSpan) {
+                numSpan.classList.remove('w-5', 'h-5', 'text-[9px]');
+                numSpan.classList.add('w-7', 'h-7', 'text-sm', 'font-black');
+            }
+            
+            // 名字字體加重
+            const nameSpan = card.querySelector('span:nth-child(2)');
+            if (nameSpan) {
+                nameSpan.classList.remove('font-bold');
+                nameSpan.classList.add('font-extrabold');
+            }
 
             if (!card.querySelector('.delete-btn')) {
                 const deleteBtn = document.createElement('button');
-                // 使用 opacity-0 及 group-hover:opacity-100，將刪除按鈕改成滑鼠懸停時在右側邊緣浮現
-                deleteBtn.className = "delete-btn text-red-400 hover:text-red-600 focus:outline-none transition-all absolute right-1.5 bg-white/90 pl-1 rounded opacity-0 group-hover:opacity-100 z-20 h-5 flex items-center";
-                deleteBtn.innerHTML = `<i class="fa-regular fa-trash-can text-xs"></i>`;
+                // 刪除按鈕配合放大的卡片微調定位與大小
+                deleteBtn.className = "delete-btn text-red-400 hover:text-red-600 focus:outline-none transition-all absolute right-1.5 bg-white/90 pl-1 rounded opacity-0 group-hover:opacity-100 z-20 h-7 flex items-center";
+                deleteBtn.innerHTML = `<i class="fa-regular fa-trash-can text-sm"></i>`;
                 
                 deleteBtn.onclick = function(e) {
                     e.stopPropagation();
@@ -709,7 +727,6 @@
                             card.remove();
                         }
                     } else if (isBadZone) {
-                        // 待改進區刪除：同樣優先遞減次數
                         let count = parseInt(card.getAttribute('data-count') || 1);
                         if (count > 1) {
                             count--;
@@ -1039,7 +1056,7 @@
             openAlertModal();
         }
 
-        // 修改點：待改進區採用閃電重疊計次後，時間到時只遞減 1 次，若 count 歸零 (即原先為 1) 則清除卡片。
+        // 待改進區採用閃電重疊計次後，時間到時只遞減 1 次，若 count 歸零 (即原先為 1) 則清除卡片。
         function clearBadZoneOneOfEach() {
             const badZone = document.getElementById('bad-zone');
             const badCards = badZone.querySelectorAll('.student-card');
@@ -1138,7 +1155,7 @@
 
             // 1. 重構表頭：首欄固定為「登記」，寬度還原為 140px (目前是 HTML 中寫 min-w-[100px]、我們保持不變並置中)
             tableHeader.innerHTML = `
-                <th class="p-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-sm text-center">
+                <th class="p-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-sm text-center align-middle">
                     登記
                 </th>
             `;
@@ -1199,7 +1216,7 @@
                 hwTd.innerHTML = `
                     <div class="flex items-center justify-center gap-1.5 px-1 relative w-full h-full">
                         <span class="truncate text-xs md:text-sm font-bold mx-auto" title="${hw}">${hw}</span>
-                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0 absolute right-1.5" title="刪除此作業">
+                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0" title="刪除此作業">
                             <i class="fa-solid fa-circle-xmark"></i>
                         </button>
                     </div>
