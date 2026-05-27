@@ -278,8 +278,8 @@
 
                     <!-- 2. 粉色鬱金香 -->
                     <g class="flower-sway" style="transform-origin: 320px 230px; animation-delay: -1s;">
-                        <path d="M320,230 Q330,160 325,110" stroke="#059669" stroke-width="3.5" fill="none" stroke-linecap="round"/>
                         <path d="M320,230 C300,180 280,170 300,140 C310,160 315,190 320,230" fill="#34d399" stroke="#5c4033" stroke-width="2"/>
+                        <path d="M320,230 Q330,160 325,110" stroke="#059669" stroke-width="3.5" fill="none" stroke-linecap="round"/>
                         <path d="M325,110 C310,90 310,70 325,60 C340,70 340,90 325,110 Z" fill="#f43f5e" stroke="#5c4033" stroke-width="2"/>
                         <path d="M325,110 C320,95 320,80 325,60 Z" fill="#fda4af"/>
                     </g>
@@ -463,29 +463,38 @@
         <!-- ======================================================= -->
         <section id="section-quiz" class="fade-in h-full flex flex-col justify-between hidden">
             
-            <!-- 測驗內容卡片 -->
-            <div class="h-full flex flex-col justify-center max-w-xl mx-auto w-full">
-                
-                <div id="quiz-container" class="watercolor-card p-6 md:p-8 bg-[#fffdfa] text-[#5c4033]">
-                    
-                    <!-- 進度指示 -->
-                    <div class="flex justify-between items-center mb-4 border-b border-[#5c4033]/20 pb-2">
-                        <span id="quiz-progress" class="text-xs font-bold text-[#7a5e4e] tracking-wider uppercase" style="font-family: 'Quicksand', sans-serif;">Question 1 of 3</span>
-                        <span class="text-xs font-bold text-[#b45309]">🎯 挑戰答題</span>
-                    </div>
-
-                    <!-- 題目主體 -->
-                    <h3 id="quiz-question" class="text-lg md:text-xl font-black mb-6 leading-relaxed" style="font-family: 'Noto Serif TC', serif;">
-                        載入題目中...
-                    </h3>
-
-                    <!-- 選項按鈕區 -->
-                    <div id="quiz-options-grid" class="flex flex-col gap-3">
-                        <!-- 動態插入選項 -->
-                    </div>
-
+            <!-- 【滾動機制優化】在最外層容器加上 overflow-y-auto，並移除剛硬的卡片 85% 高度限制 -->
+            <div class="h-full flex flex-col justify-start max-w-xl mx-auto w-full overflow-y-auto pr-2 pb-6">
+                <!-- 測驗分級切換 -->
+                <div class="flex gap-3 mb-4 justify-center text-xs md:text-sm shrink-0">
+                    <button id="btn-quiz-basic" class="bg-[#5c4033] text-white px-4 py-1.5 rounded-full font-bold border border-[#5c4033] shadow-sm transition-all">
+                        🌱 基礎觀察測驗 (低年級)
+                    </button>
+                    <button id="btn-quiz-advance" class="bg-white text-[#5c4033] px-4 py-1.5 rounded-full font-bold border border-[#5c4033] shadow-sm transition-all hover:bg-[#faf4ed]">
+                        🔬 進階實驗測驗 (中高年級)
+                    </button>
                 </div>
+                
+                <!-- 測驗內容卡片：改為自適應高度與設定最低高度 min-h-[350px] -->
+                <div id="quiz-container" class="watercolor-card p-6 md:p-8 bg-[#fffdfa] text-[#5c4033] flex flex-col justify-between min-h-[350px]">
+                    <div>
+                        <!-- 進度指示 -->
+                        <div class="flex justify-between items-center mb-4 border-b border-[#5c4033]/20 pb-2">
+                            <span id="quiz-progress" class="text-xs font-bold text-[#7a5e4e] tracking-wider uppercase" style="font-family: 'Quicksand', sans-serif;">Question 1 of 5</span>
+                            <span class="text-xs font-bold text-[#b45309]">🎯 挑戰答題</span>
+                        </div>
 
+                        <!-- 題目主體 -->
+                        <h3 id="quiz-question" class="text-base md:text-lg font-black mb-4 leading-relaxed" style="font-family: 'Noto Serif TC', serif;">
+                            載入題目中...
+                        </h3>
+
+                        <!-- 選項按鈕區 -->
+                        <div id="quiz-options-grid" class="flex flex-col gap-3">
+                            <!-- 動態插入選項 -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </section>
@@ -528,7 +537,7 @@
 
     <!-- ================= 測驗結束＆證書視窗 ================= -->
     <div id="quiz-complete-modal" class="fixed inset-0 bg-[#5c4033]/60 backdrop-blur-xs z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
-        <div id="quiz-complete-card" class="bg-[#fffdf9] border-4 border-[#5c4033] p-8 rounded-3xl shadow-[8px_8px_0px_#5c4033] text-center max-w-md mx-4 transform scale-90 transition-transform duration-300 text-[#5c4033]">
+        <div id="quiz-complete-card" class="bg-[#fffdf9] border-4 border-[#5c4033] p-8 rounded-3xl shadow-[8px_8px_0px_#5c4033] text-center max-md mx-4 transform scale-90 transition-transform duration-300 text-[#5c4033] max-w-md">
             <span class="text-6xl block mb-3 animate-bounce">🎓</span>
             <h2 class="text-2xl font-black mb-1" style="font-family: 'Noto Serif TC', serif;">光影知識大挑戰</h2>
             <p class="text-sm text-[#7a5e4e] mb-4" style="font-family: 'Quicksand', sans-serif;">CONGRATULATIONS</p>
@@ -536,7 +545,7 @@
             <!-- 答題成績 -->
             <div class="bg-[#fcf8f2] border border-[#5c4033]/30 p-4 rounded-xl mb-6">
                 <p class="text-base font-bold mb-1">恭喜完成所有挑戰！</p>
-                <p class="text-2xl font-black text-[#b45309]" id="quiz-score-display">得分：3 / 3 題</p>
+                <p class="text-2xl font-black text-[#b45309]" id="quiz-score-display">得分：5 / 5 題</p>
                 <p class="text-xs text-[#7a5e4e] mt-2" id="quiz-eval-text">你已經完全掌握了影子的魔術囉！</p>
             </div>
 
@@ -551,6 +560,7 @@
         // --- 1. 遊戲與網頁狀態變數 ---
         let currentTab = 'learn'; // 'learn', 'play', 'quiz'
         let currentLearnLevel = 'basic'; // 'basic' or 'advance'
+        let currentQuizLevel = 'basic'; // 'basic' or 'advance'
         let score = 0;
         let isGameActive = true; 
         
@@ -771,41 +781,93 @@
             renderLearnCards();
         });
 
-        // --- 3. 測驗相關數據 (已更新為對應小學堂的低年級題目) ---
-        let quizScore = 0;
-        let currentQuestionIndex = 0;
-        const quizData = [
-            {
-                question: "1. 早上上學的時候，如果你面向東邊迎著太陽走，你會發現自己長長的小影子躲在你的哪一邊呢？ 🧭",
-                options: [
-                    { text: "躲在你的身體後面，跟太陽反方向 👣", correct: true },
-                    { text: "跑到你的正前方，一直擋在路上 🛑", correct: false },
-                    { text: "小影子會自己縮進口袋裡睡覺 🧥", correct: false }
-                ],
-                explanation: "答對了！影子永遠和發光的太陽唱反調。太陽在前面（東邊），影子就一定會躲在後面（西邊）喔！",
-                linkedCardId: "learn-card-basic-opposite" // 對應「影子和太陽唱反調」
-            },
-            {
-                question: "2. 美麗的彩繪玻璃蝴蝶照到光之後，能在地面或紙面上投射出「亮晶晶的彩色影子」，這是因為什麼呢？ 💎",
-                options: [
-                    { text: "定彩繪玻璃是『不透明』的，光完全進不去 🪵", correct: false },
-                    { text: "因為彩繪玻璃是『半透明』的，能讓帶有色彩的光穿過去 ✨", correct: true },
-                    { text: "因為小蝴蝶自己偷偷裝了彩色的亮亮小燈泡 💡", correct: false }
-                ],
-                explanation: "太棒了！半透明的彩色玻璃能讓光帶著美麗的顏色穿過去，所以投射出來的影子也是漂亮的彩色喔！",
-                linkedCardId: "learn-card-adv-translucency" // 對應「透光度的秘密」
-            },
-            {
-                question: "3. 下課時間，小明和小華並排站在一起開心地向太陽揮手，這時他們的影子會指向哪裡呢？ 👥",
-                options: [
-                    { text: "開照著同一顆太陽，所以大家的影子都會指向同一個方向 ➡️", correct: true },
-                    { text: "一個影子指前面，另一個指後面 ↔️", correct: false },
-                    { text: "他們的影子會開心地手拉手在原地轉圈圈 🎠", correct: false }
-                ],
-                explanation: "沒錯！同一個時間、同一個操場上只有一顆太陽照著大家，所以每個人的影子方向都是一樣的喔！",
-                linkedCardId: "learn-card-basic-same" // 對應「大家都朝同一邊」
-            }
-        ];
+        // --- 3. 測驗相關數據 (已全面區分為基礎與進階測驗題庫，完美連結小學堂) ---
+        const quizData = {
+            basic: [
+                {
+                    question: "1. 影子最喜歡跟著你玩躲貓貓了！當你在操場上快步奔跑時，你的影子會做什麼呢？ 🏃",
+                    options: [
+                        { text: "像個貼心小寵物一樣，跟著你一起跑並變換動作 👣", correct: true },
+                        { text: "站在原地一動也不動，等你回來 🛑", correct: false },
+                        { text: "生氣地往反方向，自己飛到天空中 ☁️", correct: false }
+                    ],
+                    explanation: "答對了！影子是我們的貼心小跟班，你跑它就跑，你做什麼動作它都跟著做唷！",
+                    linkedCardId: "learn-card-basic-follow"
+                },
+                {
+                    question: "2. 早上上學的時候，如果你面向東邊迎著太陽走，你會發現自己長長的小影子躲在你的哪一邊呢？ 🧭",
+                    options: [
+                        { text: "躲在你的身體後面，跟太陽相反的方向 ⬅️", correct: true },
+                        { text: "跑到你的正前方，一直擋在路上 ➡️", correct: false },
+                        { text: "小影子會自己縮進書包裡不見了 🎒", correct: false }
+                    ],
+                    explanation: "答對了！影子永遠和發光的太陽唱反調。太陽在前面（東邊），影子就一定會躲在後面（西邊）喔！",
+                    linkedCardId: "learn-card-basic-opposite"
+                },
+                {
+                    question: "3. 下課鐘聲響起，大家一起在操場上排隊站好，這時每個人的影子指向會怎麼樣呢？ 👥",
+                    options: [
+                        { text: "因為大家照著同一顆太陽，所以影子都會指向同一個方向 ➡️", correct: true },
+                        { text: "每個人影子的方向都亂七八糟、指著不同方向 ↔️", correct: false },
+                        { text: "男生的影子指左邊，女生的影子指右邊 🎠", correct: false }
+                    ],
+                    explanation: "沒錯！同一個時間、同一個操場上只有一顆太陽照著大家，所以每個人的影子方向都是一樣的喔！",
+                    linkedCardId: "learn-card-basic-same"
+                },
+                {
+                    question: "4. 大晴天和灰濛濛的陰天時，我們在操場上看到的影子有什麼不一樣呢？ 🌤️",
+                    options: [
+                        { text: "大晴天陽光強，影子黑黑超清楚；陰天時影子會灰灰霧霧的 ☀️", correct: true },
+                        { text: "陰天時的影子看起來比大晴天更黑、更清楚 🌫️", correct: false },
+                        { text: "不論是大晴天還是陰天，影子看起來都一模一樣 🤷", correct: false }
+                    ],
+                    explanation: "答對了！太陽光越強，阻擋產生的影子就會越深、越清楚；而光線弱的時候影子就會霧霧的！",
+                    linkedCardId: "learn-card-basic-intensity"
+                },
+                {
+                    question: "5. 為什麼當我們走進茂密的大樹蔭底下時，會比較看不到自己清晰的小影子呢？ 🌳",
+                    options: [
+                        { text: "因為樹葉已經把太陽光擋住了，樹下光線不足就無法產生新影子 🍃", correct: true },
+                        { text: "開我們的小影子偷偷跑去找大樹的影子玩耍了 🤸", correct: false },
+                        { text: "因為樹底下的風太大，把小影子吹走了 🍃", correct: false }
+                    ],
+                    explanation: "完全正確！大樹在上方擋住光線，樹蔭下已經是樹木影子的範圍，沒有光照下來，我們就無法變出清晰的影子囉！",
+                    linkedCardId: "learn-card-basic-trees"
+                }
+            ],
+            advance: [
+                {
+                    question: "1. 為什麼光在空氣中傳播時，能直直射向遠方，而不會自己繞過物體轉彎呢？ ☀️",
+                    options: [
+                        { text: "因為光具有「直進性」，在沒有障礙物時一律直線行進 🎯", correct: true },
+                        { text: "因為光的行進速度太慢，所以沒辦法轉彎 🐢", correct: false },
+                        { text: "因為光在害怕迷路，所以只敢走直線 🗺️", correct: false }
+                    ],
+                    explanation: "答對了！光的直進性是光學中非常守秩序的物理現象，只要沒被擋住，光精靈永遠都是走直線的！",
+                    linkedCardId: "learn-card-adv-straight"
+                },
+                {
+                    question: "2. 小明想在房間牆壁上用小手變出「大灰狼」手影戲，他必須準備哪三樣科學必備法寶呢？ 🕯️",
+                    options: [
+                        { text: "能發光的光源、擋住光的手部（阻擋物）、牆壁（承接影子的屏） 🔦", correct: true },
+                        { text: "一盒彩色蠟筆、吹風機、幾張大白紙 🎨", correct: false },
+                        { text: "真正的野狼、好吃的糖果、以及音樂音響 🎵", correct: false }
+                    ],
+                    explanation: "沒錯！光源、阻擋物以及屏，是科學上影子形成必備的三要素，缺了任何一個，影子魔法都變不出來喔！",
+                    linkedCardId: "learn-card-adv-elements"
+                },
+                {
+                    question: "3. 美麗的彩繪玻璃蝴蝶在被手電筒照射之後，能在白紙上投射出「彩色」的光影，這是因為什麼呢？ 💎",
+                    options: [
+                        { text: "因為彩繪玻璃是『半透明體』，能讓帶有色彩的光穿過去 🎨", correct: true },
+                        { text: "因為彩繪玻璃是『不透明』的物體，光完全被擋在外面 🪵", correct: false },
+                        { text: "因為蝴蝶身上偷偷裝了會一直發出彩光的小霓虹燈泡 💡", correct: false }
+                    ],
+                    explanation: "太棒了！半透明的材質允許部分光線穿過，並保留色光原有的色彩，因此能在屏上折射投射出絢麗的彩繪影子！",
+                    linkedCardId: "learn-card-adv-translucency"
+                }
+            ]
+        };
 
         // 取得 DOM 元素
         const lightBeam = document.getElementById('light-beam');
@@ -868,13 +930,13 @@
                     const notes = [523.25, 659.25, 783.99, 1046.50]; 
                     notes.forEach((freq, index) => {
                         const noteOsc = audioCtx.createOscillator();
-                        const noteGain = noteOsc.createGain();
+                        const noteGain = audioCtx.createGain();
                         noteOsc.connect(noteGain);
                         noteGain.connect(audioCtx.destination);
                         noteOsc.type = 'sine';
                         noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.08);
                         noteGain.gain.setValueAtTime(0.04, audioCtx.currentTime + index * 0.08);
-                        noteGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + index * 0.08 + 0.4);
+                        noteGain.gain.exponentialRampToValueAtTime(0.001, noteOsc.context.currentTime + 0.4);
                         noteOsc.start(audioCtx.currentTime + index * 0.08);
                         noteOsc.stop(audioCtx.currentTime + index * 0.08 + 0.45);
                     });
@@ -926,7 +988,7 @@
 
         // 【智慧型關聯與高亮函數】：點選溫習時，先判斷該卡片在哪個難度分級中，設定好後再跳轉滾動高亮
         function highlightLearnCard(cardId) {
-            // 根據 ID 前綴判斷屬於 basic (低年級) 還是 advance (中高年級)
+            // 根據 ID 判斷屬於 basic (低年級) 還是 advance (中高年級)
             const targetLevel = cardId.includes('-basic-') ? 'basic' : 'advance';
             
             // 1. 先設定分級狀態
@@ -947,8 +1009,7 @@
             // 4. 等待 DOM 渲染完畢後，平滑捲動到該卡片並播放呼吸燈閃爍動畫
             setTimeout(() => {
                 const card = document.getElementById(cardId);
-                const container = document.getElementById('main-content');
-                if (card && container) {
+                if (card) {
                     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     
                     // 加上呼吸發光特效
@@ -1094,7 +1155,7 @@
             updateFlashlightPosition();
         });
 
-        // --- 7. 小試身手評量功能 (Quiz System) ---
+        // --- 7. 小試身手評量功能 (Quiz System - 新增分級與卡片導向) ---
         const quizQuestion = document.getElementById('quiz-question');
         const quizOptionsGrid = document.getElementById('quiz-options-grid');
         const quizProgress = document.getElementById('quiz-progress');
@@ -1104,14 +1165,35 @@
         const quizEvalText = document.getElementById('quiz-eval-text');
         const btnQuizRetry = document.getElementById('btn-quiz-retry');
 
+        const btnQuizBasic = document.getElementById('btn-quiz-basic');
+        const btnQuizAdvance = document.getElementById('btn-quiz-advance');
+
+        // 切換測驗分級按鈕監聽
+        btnQuizBasic.addEventListener('click', () => {
+            currentQuizLevel = 'basic';
+            playSound('page');
+            btnQuizBasic.className = "bg-[#5c4033] text-white px-4 py-1.5 rounded-full font-bold border border-[#5c4033] shadow-sm transition-all";
+            btnQuizAdvance.className = "bg-white text-[#5c4033] px-4 py-1.5 rounded-full font-bold border border-[#5c4033] shadow-sm transition-all hover:bg-[#faf4ed]";
+            loadQuizQuestion(0);
+        });
+
+        btnQuizAdvance.addEventListener('click', () => {
+            currentQuizLevel = 'advance';
+            playSound('page');
+            btnQuizAdvance.className = "bg-[#5c4033] text-white px-4 py-1.5 rounded-full font-bold border border-[#5c4033] shadow-sm transition-all";
+            btnQuizBasic.className = "bg-white text-[#5c4033] px-4 py-1.5 rounded-full font-bold border border-[#5c4033] shadow-sm transition-all hover:bg-[#faf4ed]";
+            loadQuizQuestion(0);
+        });
+
         function loadQuizQuestion(index) {
             currentQuestionIndex = index;
             if (index === 0) {
                 quizScore = 0;
             }
 
-            const q = quizData[index];
-            quizProgress.textContent = `Question ${index + 1} of ${quizData.length}`;
+            const activeQuizList = quizData[currentQuizLevel];
+            const q = activeQuizList[index];
+            quizProgress.textContent = `Question ${index + 1} of ${activeQuizList.length}`;
             quizQuestion.textContent = q.question;
 
             quizOptionsGrid.innerHTML = '';
@@ -1144,6 +1226,8 @@
             const explanationModal = document.createElement('div');
             explanationModal.className = "fixed inset-0 bg-[#5c4033]/60 backdrop-blur-xs z-50 flex items-center justify-center fade-in";
             
+            const activeQuizList = quizData[currentQuizLevel];
+            
             explanationModal.innerHTML = `
                 <div class="bg-[#fffdf9] border-4 border-[#5c4033] p-6 rounded-3xl shadow-[6px_6px_0px_#5c4033] text-center max-w-sm mx-4 text-[#5c4033]">
                     <span class="text-5xl block mb-2">${isCorrect ? '✨' : '🎨'}</span>
@@ -1158,7 +1242,7 @@
                         </button>
                         <!-- 下一題按鈕 -->
                         <button id="btn-next-question" class="w-full bg-[#f43f5e] hover:bg-rose-600 border-2 border-[#5c4033] text-white font-black py-2.5 rounded-xl shadow-[3px_3px_0px_#5c4033] active:translate-y-0.5 active:shadow-none transition-all text-sm">
-                            ${currentQuestionIndex === quizData.length - 1 ? '看成績 🏆' : '下一題 ➔'}
+                            ${currentQuestionIndex === activeQuizList.length - 1 ? '看成績 🏆' : '下一題 ➔'}
                         </button>
                     </div>
                 </div>
@@ -1175,7 +1259,7 @@
             document.getElementById('btn-next-question').addEventListener('click', () => {
                 document.body.removeChild(explanationModal);
                 
-                if (currentQuestionIndex < quizData.length - 1) {
+                if (currentQuestionIndex < activeQuizList.length - 1) {
                     loadQuizQuestion(currentQuestionIndex + 1);
                 } else {
                     showQuizResults();
@@ -1185,9 +1269,10 @@
 
         function showQuizResults() {
             playSound('victory');
-            quizScoreDisplay.textContent = `得分：${quizScore} / ${quizData.length} 題`;
+            const activeQuizList = quizData[currentQuizLevel];
+            quizScoreDisplay.textContent = `得分：${quizScore} / ${activeQuizList.length} 題`;
             
-            if (quizScore === quizData.length) {
+            if (quizScore === activeQuizList.length) {
                 quizEvalText.textContent = "太神奇了！你已經是名副其實的「光影探索小尖兵」了喔！🎖️";
             } else if (quizScore >= 1) {
                 quizEvalText.textContent = "很棒的嘗試！你對影子已經有深刻的認識，再挑戰一局吧！🌿";
