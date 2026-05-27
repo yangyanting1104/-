@@ -489,6 +489,7 @@
             });
         }
 
+        // 允許放置
         function allowDrop(e) {
             e.preventDefault();
         }
@@ -520,10 +521,11 @@
             addStudentToZone(number, name, zoneType, sourceCard);
         }
 
-        // 核心：分發學生到指定區域的整合邏輯
+        // 核心：分發學生到指定區域的整合邏輯 (完美實現好表現區星星重疊與待改進區閃電重疊)
         function addStudentToZone(number, name, zoneType, sourceCard) {
             const isFromPool = sourceCard.parentElement.id === 'student-pool';
             const wasInGood = sourceCard.parentElement && sourceCard.parentElement.id === 'good-zone';
+            const wasInBad = sourceCard.parentElement && sourceCard.parentElement.id === 'bad-zone';
             const goodZone = document.getElementById('good-zone');
             const badZone = document.getElementById('bad-zone');
             const targetZone = zoneType === 'good' ? goodZone : badZone;
@@ -562,33 +564,92 @@
                         sourceCard.parentNode.insertBefore(newCard, sourceCard);
                         moveCardToZone(sourceCard, targetZone);
                     } else {
-                        moveCardToZone(sourceCard, targetZone);
+                        if (wasInBad) {
+                            let count = parseInt(sourceCard.getAttribute('data-count') || 1);
+                            if (count > 1) {
+                                count--;
+                                sourceCard.setAttribute('data-count', count);
+                                let badge = sourceCard.querySelector('.lightning-badge');
+                                if (badge) {
+                                    if (count === 1) {
+                                        badge.remove();
+                                    } else {
+                                        badge.querySelector('.badge-count').textContent = count;
+                                    }
+                                }
+                                const goodCard = createStudentCard(number, name);
+                                moveCardToZone(goodCard, targetZone);
+                            } else {
+                                const lightningBadge = sourceCard.querySelector('.lightning-badge');
+                                if (lightningBadge) lightningBadge.remove();
+                                moveCardToZone(sourceCard, targetZone);
+                            }
+                        } else {
+                            moveCardToZone(sourceCard, targetZone);
+                        }
                     }
                     sourceCard.setAttribute('data-count', '1');
                 }
             } else {
-                if (isFromPool) {
-                    const newCard = createStudentCard(number, name);
-                    sourceCard.parentNode.insertBefore(newCard, sourceCard);
-                    moveCardToZone(sourceCard, targetZone);
+                // 待改進區：同樣實現閃電計次重疊
+                const existingCard = badZone.querySelector(`.student-card[data-number="${number}"][data-name="${name}"]`);
+                
+                if (existingCard) {
+                    let count = parseInt(existingCard.getAttribute('data-count') || 1);
+                    count++;
+                    existingCard.setAttribute('data-count', count);
+                    
+                    let badge = existingCard.querySelector('.lightning-badge');
+                    if (!badge) {
+                        badge = document.createElement('div');
+                        badge.className = "lightning-badge absolute -top-2.5 -right-2 bg-yellow-400 border border-yellow-300 text-yellow-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
+                        badge.innerHTML = `<i class="fa-solid fa-bolt text-[8px] mr-0.5 text-yellow-700"></i><span class="badge-count">${count}</span>`;
+                        existingCard.appendChild(badge);
+                    } else {
+                        badge.querySelector('.badge-count').textContent = count;
+                    }
+
+                    if (isFromPool) {
+                        const newCard = createStudentCard(number, name);
+                        sourceCard.parentNode.insertBefore(newCard, sourceCard);
+                        sourceCard.remove();
+                    } else {
+                        sourceCard.remove();
+                    }
+                    
+                    // 排序待改進區
+                    sortZoneCards(badZone);
                 } else {
-                    if (wasInGood) {
-                        let count = parseInt(sourceCard.getAttribute('data-count') || 1);
-                        if (count > 1) {
-                            count--;
-                            sourceCard.setAttribute('data-count', count);
-                            let badge = sourceCard.querySelector('.star-badge');
-                            if (badge) {
-                                badge.querySelector('.badge-count').textContent = count;
+                    if (isFromPool) {
+                        const newCard = createStudentCard(number, name);
+                        sourceCard.parentNode.insertBefore(newCard, sourceCard);
+                        moveCardToZone(sourceCard, targetZone);
+                    } else {
+                        if (wasInGood) {
+                            let count = parseInt(sourceCard.getAttribute('data-count') || 1);
+                            if (count > 1) {
+                                count--;
+                                sourceCard.setAttribute('data-count', count);
+                                let badge = sourceCard.querySelector('.star-badge');
+                                if (badge) {
+                                    if (count === 1) {
+                                        badge.remove();
+                                    } else {
+                                        badge.querySelector('.badge-count').textContent = count;
+                                    }
+                                }
+                                const badCard = createStudentCard(number, name);
+                                moveCardToZone(badCard, targetZone);
+                            } else {
+                                const starBadge = sourceCard.querySelector('.star-badge');
+                                if (starBadge) starBadge.remove();
+                                moveCardToZone(sourceCard, targetZone);
                             }
-                            const badCard = createStudentCard(number, name);
-                            moveCardToZone(badCard, targetZone);
                         } else {
                             moveCardToZone(sourceCard, targetZone);
                         }
-                    } else {
-                        moveCardToZone(sourceCard, targetZone);
                     }
+                    sourceCard.setAttribute('data-count', '1');
                 }
             }
 
@@ -629,6 +690,7 @@
                     e.stopPropagation();
                     const parent = card.parentElement;
                     const isGoodZone = parent && parent.id === 'good-zone';
+                    const isBadZone = parent && parent.id === 'bad-zone';
 
                     if (isGoodZone) {
                         let count = parseInt(card.getAttribute('data-count') || 1);
@@ -637,7 +699,28 @@
                             card.setAttribute('data-count', count);
                             let badge = card.querySelector('.star-badge');
                             if (badge) {
-                                badge.querySelector('.badge-count').textContent = count;
+                                if (count === 1) {
+                                    badge.remove();
+                                } else {
+                                    badge.querySelector('.badge-count').textContent = count;
+                                }
+                            }
+                        } else {
+                            card.remove();
+                        }
+                    } else if (isBadZone) {
+                        // 待改進區刪除：同樣優先遞減次數
+                        let count = parseInt(card.getAttribute('data-count') || 1);
+                        if (count > 1) {
+                            count--;
+                            card.setAttribute('data-count', count);
+                            let badge = card.querySelector('.lightning-badge');
+                            if (badge) {
+                                if (count === 1) {
+                                    badge.remove();
+                                } else {
+                                    badge.querySelector('.badge-count').textContent = count;
+                                }
                             }
                         } else {
                             card.remove();
@@ -956,22 +1039,28 @@
             openAlertModal();
         }
 
+        // 修改點：待改進區採用閃電重疊計次後，時間到時只遞減 1 次，若 count 歸零 (即原先為 1) 則清除卡片。
         function clearBadZoneOneOfEach() {
             const badZone = document.getElementById('bad-zone');
             const badCards = badZone.querySelectorAll('.student-card');
 
             if (badCards.length === 0) return;
 
-            const clearedSet = new Set();
-
             badCards.forEach(card => {
-                const number = card.getAttribute('data-number');
-                const name = card.getAttribute('data-name');
-                const uniqueKey = `${number}-${name}`;
-
-                if (!clearedSet.has(uniqueKey)) {
+                let count = parseInt(card.getAttribute('data-count') || 1);
+                if (count > 1) {
+                    count--;
+                    card.setAttribute('data-count', count);
+                    let badge = card.querySelector('.lightning-badge');
+                    if (badge) {
+                        if (count === 1) {
+                            badge.remove();
+                        } else {
+                            badge.querySelector('.badge-count').textContent = count;
+                        }
+                    }
+                } else {
                     card.remove();
-                    clearedSet.add(uniqueKey);
                 }
             });
 
@@ -1042,12 +1131,12 @@
             }
         }
 
-        // 繪製與同步作業檢核表格
+        // 繪製與同步作業檢核表格 (已更名為「登記」且還原第一直欄寬度為 100px，作業名稱大小恢復為原間距與大小)
         function renderHomeworkTable() {
             const tableHeader = document.getElementById('hw-table-header');
             const tableBody = document.getElementById('hw-table-body');
 
-            // 1. 重構表頭：首欄固定為「登記」，寬度還原為 140px
+            // 1. 重構表頭：首欄固定為「登記」，寬度還原為 140px (目前是 HTML 中寫 min-w-[100px]、我們保持不變並置中)
             tableHeader.innerHTML = `
                 <th class="p-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-sm text-center">
                     登記
@@ -1103,7 +1192,8 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-amber-50/40 transition-colors";
 
-                // 第一直欄：作業名稱 (固定最左側，滑動時不遮擋)
+                // 第一直欄：作業名稱 (固定最左側，滑動時不遮擋) — 寬度也同步還原為 140px，字體與刪除按鈕恢復原大小
+                // 重要優化：增加 text-center，並使用絕對定位處理刪除按鈕，讓作業項目名稱完美上下左右置中對齊
                 const hwTd = document.createElement('td');
                 hwTd.className = "p-2.5 border-b border-r border-amber-200 bg-white font-semibold text-[#78350f] sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)] group min-w-[100px] text-center align-middle";
                 hwTd.innerHTML = `
