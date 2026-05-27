@@ -70,11 +70,11 @@
         <p class="text-gray-500 text-xs md:text-[12px]">互動式行為表現與計時器、作業檢核系統</p>
     </header>
 
-    <!-- 網頁主要三大區塊版面：橫式 3 欄等高佈局 (調整為 3:5:4 比例，計時器寬度加寬，中欄表現記錄區適度微調) -->
-    <main class="grid grid-cols-1 md:grid-cols-12 gap-5 md:h-[580px] shrink-0 min-h-0 mb-6">
+    <!-- 網頁主要三大區塊版面：橫式 3 欄等高佈局 (已精確調整為 3.5:5:3.5 的黃金對稱比例) -->
+    <main class="grid grid-cols-1 md:grid-cols-[3.5fr_5fr_3.5fr] gap-5 md:h-[580px] shrink-0 min-h-0 mb-6">
         
-        <!-- 左欄：學生姓名區 (佔 12 格中的 3 格) -->
-        <section class="md:col-span-3 flex flex-col h-full min-h-0">
+        <!-- 左欄：學生姓名區 -->
+        <section class="flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0">
                 <!-- 區塊標題 -->
                 <h2 class="text-lg font-bold text-[#78350f] mb-2.5 flex items-center justify-between shrink-0">
@@ -125,8 +125,8 @@
             </div>
         </section>
 
-        <!-- 中欄：表現記錄區 (佔 12 格中的 5 格，適度加寬保留大名牌空間) -->
-        <section class="md:col-span-5 flex flex-col h-full min-h-0">
+        <!-- 中欄：表現記錄區 -->
+        <section class="flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0 gap-3">
                 <!-- 區塊標題 -->
                 <h2 class="text-lg font-bold text-[#78350f] shrink-0 flex items-center gap-2">
@@ -143,7 +143,7 @@
                             <span>好表現區</span>
                             <span id="good-count" class="ml-auto text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
-                        <!-- 放置區容器 — 改為 flex-col 由上往下單欄排列，去除分散，靠緊頂部 -->
+                        <!-- 放置區容器 — flex-col 由上往下單欄排列，去除分散，靠緊頂部 -->
                         <div id="good-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-2 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'good')">
                             <div class="placeholder py-8 flex items-center justify-center text-emerald-400 text-xs text-center italic">
                                 拖曳學生至此
@@ -158,7 +158,7 @@
                             <span>待改進區</span>
                             <span id="bad-count" class="ml-auto text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
-                        <!-- 放置區容器 — 改為 flex-col 由上往下單欄排列，去除分散，靠緊頂部 -->
+                        <!-- 放置區容器 — flex-col 由上往下單欄排列，去除分散，靠緊頂部 -->
                         <div id="bad-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-2 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'bad')">
                             <div class="placeholder py-8 flex items-center justify-center text-rose-400 text-xs text-center italic">
                                 拖曳學生至此
@@ -169,8 +169,8 @@
             </div>
         </section>
 
-        <!-- 右欄：計時器專區 (佔 12 格中的 4 格，寬度加寬) -->
-        <section class="md:col-span-4 flex flex-col h-full min-h-0">
+        <!-- 右欄：計時器專區 -->
+        <section class="flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full justify-between bg-gradient-to-b from-white to-[#fffbeb] min-h-0 overflow-y-auto">
                 <div>
                     <!-- 區塊標題 -->
@@ -280,7 +280,7 @@
                 </span>
                 <span class="flex items-center gap-1">
                     <span class="w-4 h-4 rounded bg-emerald-50 border border-emerald-200 inline-block text-center text-[10px] text-emerald-600 leading-none">✓</span>
-                    已完成 / 已繳交 (無色塊)
+                    Ref-已完成 / 已繳交 (無色塊)
                 </span>
             </div>
         </div>
@@ -502,6 +502,7 @@
             zone.classList.add('drag-hover');
         }
 
+        // 移除拖曳懸停效果
         function dragLeave(e) {
             const zone = e.currentTarget;
             zone.classList.remove('drag-hover');
@@ -671,7 +672,7 @@
             cards.forEach(card => zone.appendChild(card));
         }
 
-        // 當學生方塊被拖移至表現記錄區時，整體放大一點點 (寬度 w-40, 高度 h-12, 名字升級為 text-base md:text-lg)
+        // 當學生方塊被拖移至表現記錄區時，整體再放大一點點 (寬度 w-40, 高度 h-12, 名字升級為 text-base md:text-lg)
         function moveCardToZone(card, zone) {
             const placeholder = zone.querySelector('.placeholder');
             if (placeholder) {
@@ -681,7 +682,7 @@
             // 先清理原來的緊密微型樣式
             card.classList.remove('py-2', 'px-2.5', 'text-xs');
             
-            // 表現區「整體放大」樣式設定：寬度加長至 w-40 (160px)、高度 h-12 (48px)、內距與字體同步放大為 text-base md:text-lg，視覺張力更佳！
+            // 表現區「整體放大」樣式設定：寬度加長至 w-40 (160px)、高度 h-12 (48px)、內距與字體同步放大為 text-base md:text-lg
             card.classList.add('py-2', 'px-3.5', 'text-base', 'md:text-lg', 'shadow-md', 'w-40', 'h-12', 'shrink-0', 'mx-auto', 'justify-self-center', 'group');
 
             // 同步放大座號圓圈及圓圈內字級 (w-7 h-7, text-sm font-black)
@@ -1216,7 +1217,7 @@
                 hwTd.innerHTML = `
                     <div class="flex items-center justify-center gap-1.5 px-1 relative w-full h-full">
                         <span class="truncate text-xs md:text-sm font-bold mx-auto" title="${hw}">${hw}</span>
-                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0" title="刪除此作業">
+                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0 absolute right-1.5" title="刪除此作業">
                             <i class="fa-solid fa-circle-xmark"></i>
                         </button>
                     </div>
