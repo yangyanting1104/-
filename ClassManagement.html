@@ -67,7 +67,7 @@
             <i class="fa-solid fa-graduation-cap text-[#f59e0b]"></i>
             班級經營互動看板
         </h1>
-        <p class="text-gray-500 text-xs md:text-[12px]">　　　 互動式行為表現與計時器、作業檢核系統</p>
+        <p class="text-gray-500 text-xs md:text-[12px]">互動式行為表現與計時器、作業檢核系統</p>
     </header>
 
     <!-- 網頁主要三大區塊版面：橫式 3 欄等高佈局 (已精確調整為 3.5:5:3.5 的黃金對稱比例) -->
@@ -339,7 +339,7 @@
 
         // 3. 處理預設範例資料 (更新為雁婷老師的真實學生名單)
         function loadDemoStudents() {
-            const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
+            const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳雷伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
             document.getElementById('text-input').value = demoText;
             switchImportTab('text');
             generateFromText();
@@ -702,7 +702,7 @@
             if (!card.querySelector('.delete-btn')) {
                 const deleteBtn = document.createElement('button');
                 // 刪除按鈕配合放大的卡片微調定位與大小
-                deleteBtn.className = "delete-btn text-red-400 hover:text-red-600 focus:outline-none transition-all absolute right-1.5 bg-white/90 pl-1 rounded opacity-0 group-hover:opacity-100 z-20 h-7 flex items-center";
+                deleteBtn.className = "delete-btn text-red-400 hover:text-red-600 focus:outline-none transition-all absolute right-2.5 bg-white/90 pl-1 rounded opacity-0 group-hover:opacity-100 z-20 h-7 flex items-center";
                 deleteBtn.innerHTML = `<i class="fa-regular fa-trash-can text-sm"></i>`;
                 
                 deleteBtn.onclick = function(e) {
