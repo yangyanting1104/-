@@ -362,7 +362,7 @@
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-                const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                const rows = XLSX.utils.sheet_to_json(rows, {header: 1});
                 
                 let parsedStudents = [];
                 rows.forEach((row, index) => {
@@ -440,15 +440,15 @@
             });
         }
 
-        // 7. 創建單一學生方塊 DOM 元素 (學生姓名區恢復為原始的較小字體與緊密間距)
+        // 7. 創建單一學生方塊 DOM 元素 (學生姓名區恢復為原始的較小字體與緊密間距，並在卡片內部水平/垂直置中)
         function createStudentCard(number, name) {
             totalCreatedCount++;
             const uniqueId = `student-${totalCreatedCount}`;
 
             const card = document.createElement('div');
             card.id = uniqueId;
-            // 恢復原本輕巧好排印的 text-xs 與 py-2 px-2.5 間距
-            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-2.5 rounded-xl flex items-center gap-1.5 cursor-grab active:cursor-grabbing select-none transition-all text-xs font-semibold relative";
+            // 恢復原本輕巧好排印的 text-xs 與 py-2 px-2.5 間距，並加入 justify-center 來置中所有內容
+            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-grab active:cursor-grabbing select-none transition-all text-xs font-semibold relative";
             card.setAttribute('draggable', 'true');
             card.setAttribute('data-number', number);
             card.setAttribute('data-name', name);
@@ -672,7 +672,7 @@
             cards.forEach(card => zone.appendChild(card));
         }
 
-        // 當學生方塊被拖移至表現記錄區時，整體再放大一點點 (寬度 w-40, 高度 h-12, 名字升級為 text-base md:text-lg)
+        // 當學生方塊被拖移至表現記錄區時，整體放大一點點 (寬度 w-40, 高度 h-12, 名字升級為 text-base md:text-lg，並加上居中樣式)
         function moveCardToZone(card, zone) {
             const placeholder = zone.querySelector('.placeholder');
             if (placeholder) {
@@ -680,10 +680,10 @@
             }
             
             // 先清理原來的緊密微型樣式
-            card.classList.remove('py-2', 'px-2.5', 'text-xs');
+            card.classList.remove('py-2', 'px-2.5', 'text-xs', 'justify-center');
             
-            // 表現區「整體放大」樣式設定：寬度加長至 w-40 (160px)、高度 h-12 (48px)、內距與字體同步放大為 text-base md:text-lg
-            card.classList.add('py-2', 'px-3.5', 'text-base', 'md:text-lg', 'shadow-md', 'w-40', 'h-12', 'shrink-0', 'mx-auto', 'justify-self-center', 'group');
+            // 表現區「整體放大」與「置中對齊」樣式設定：寬度加長至 w-40 (160px)、高度 h-12 (48px)、字體放大為 text-base md:text-lg，並使用 flex 置中
+            card.classList.add('py-2', 'px-3.5', 'text-base', 'md:text-lg', 'shadow-md', 'w-40', 'h-12', 'shrink-0', 'mx-auto', 'justify-center', 'items-center', 'group');
 
             // 同步放大座號圓圈及圓圈內字級 (w-7 h-7, text-sm font-black)
             const numSpan = card.querySelector('span:first-child');
@@ -1217,7 +1217,7 @@
                 hwTd.innerHTML = `
                     <div class="flex items-center justify-center gap-1.5 px-1 relative w-full h-full">
                         <span class="truncate text-xs md:text-sm font-bold mx-auto" title="${hw}">${hw}</span>
-                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0 absolute right-1.5" title="刪除此作業">
+                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0" title="刪除此作業">
                             <i class="fa-solid fa-circle-xmark"></i>
                         </button>
                     </div>
