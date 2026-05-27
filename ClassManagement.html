@@ -256,7 +256,7 @@
                 <table class="w-full border-collapse text-center">
                     <thead>
                         <tr id="hw-table-header" class="bg-amber-100/50 text-[#78350f] font-bold text-sm">
-                            <!-- 首欄：更名為「登記」且設定左右、上下完美置中對齊 -->
+                            <!-- 首欄：標題改為「登記」且設定左右、上下完美置中對齊 -->
                             <th class="p-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-sm text-center align-middle">登記</th>
                             <!-- 動態生成的學生座號+姓名欄位會插在這裡 -->
                         </tr>
@@ -608,7 +608,7 @@
             cards.forEach(card => zone.appendChild(card));
         }
 
-        // 進入表現區後，賦予卡片固定的寬度與高度
+        // 進入表現區後，賦予卡片固定的寬度與高度，並設定垃圾桶按鈕滑鼠懸停時在右側邊緣浮現
         function moveCardToZone(card, zone) {
             const placeholder = zone.querySelector('.placeholder');
             if (placeholder) {
@@ -616,11 +616,13 @@
             }
             
             card.classList.remove('py-2', 'px-2.5');
-            card.classList.add('py-1', 'px-1.5', 'text-[11px]', 'shadow-sm', 'w-28', 'h-9', 'shrink-0', 'mx-auto', 'justify-self-center');
+            // 為卡片加上固定的寬高，並加上 group，方便子元素使用 group-hover 做出懸停效果
+            card.classList.add('py-1', 'px-1.5', 'text-[11px]', 'shadow-sm', 'w-28', 'h-9', 'shrink-0', 'mx-auto', 'justify-self-center', 'group');
 
             if (!card.querySelector('.delete-btn')) {
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = "delete-btn ml-auto text-red-400 hover:text-red-600 focus:outline-none shrink-0 transition-colors relative z-20";
+                // 使用 opacity-0 及 group-hover:opacity-100，將刪除按鈕改成滑鼠懸停時在右側邊緣浮現
+                deleteBtn.className = "delete-btn text-red-400 hover:text-red-600 focus:outline-none transition-all absolute right-1.5 bg-white/90 pl-1 rounded opacity-0 group-hover:opacity-100 z-20 h-5 flex items-center";
                 deleteBtn.innerHTML = `<i class="fa-regular fa-trash-can text-xs"></i>`;
                 
                 deleteBtn.onclick = function(e) {
@@ -1040,12 +1042,12 @@
             }
         }
 
-        // 繪製與同步作業檢核表格 (已更名為「登記」且還原第一直欄寬度為 100px，作業名稱大小恢復為原間距與大小)
+        // 繪製與同步作業檢核表格
         function renderHomeworkTable() {
             const tableHeader = document.getElementById('hw-table-header');
             const tableBody = document.getElementById('hw-table-body');
 
-            // 1. 重構表頭：首欄固定為「登記」，寬度還原為 140px (目前是 HTML 中寫 min-w-[100px]、我們保持不變並置中)
+            // 1. 重構表頭：首欄固定為「登記」，寬度還原為 140px
             tableHeader.innerHTML = `
                 <th class="p-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-sm text-center">
                     登記
@@ -1101,8 +1103,7 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-amber-50/40 transition-colors";
 
-                // 第一直欄：作業名稱 (固定最左側，滑動時不遮擋) — 寬度也同步還原為 140px，字體與刪除按鈕恢復原大小
-                // 重要優化：增加 text-center，並使用絕對定位處理刪除按鈕，讓作業項目名稱完美上下左右置中對齊
+                // 第一直欄：作業名稱 (固定最左側，滑動時不遮擋)
                 const hwTd = document.createElement('td');
                 hwTd.className = "p-2.5 border-b border-r border-amber-200 bg-white font-semibold text-[#78350f] sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)] group min-w-[100px] text-center align-middle";
                 hwTd.innerHTML = `
