@@ -141,11 +141,11 @@
                         <div class="flex items-center gap-1.5 mb-1.5 text-emerald-700 font-bold border-b border-emerald-100 pb-1 shrink-0 text-xs">
                             <i class="fa-regular fa-face-laugh-beam text-lg text-emerald-500"></i>
                             <span>好表現區</span>
-                            <span id="good-count" class="ml-auto text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">0 個</span>
+                            <span id="good-count" class="ml-auto text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
-                        <!-- 放置區容器 — 加入 justify-items-center 以確保卡片不被拉伸並整齊置中 -->
-                        <div id="good-zone" class="drag-zone flex-grow overflow-y-auto grid grid-cols-1 xl:grid-cols-2 gap-2 p-1 min-h-0 rounded-xl transition-all justify-items-center" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'good')">
-                            <div class="placeholder col-span-full h-full flex items-center justify-center text-emerald-400 text-xs text-center italic">
+                        <!-- 放置區容器 — 改為 flex-col 由上往下單欄排列，去除分散，靠緊頂部 -->
+                        <div id="good-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-2 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'good')">
+                            <div class="placeholder py-8 flex items-center justify-center text-emerald-400 text-xs text-center italic">
                                 拖曳學生至此
                             </div>
                         </div>
@@ -156,11 +156,11 @@
                         <div class="flex items-center gap-1.5 mb-1.5 text-rose-700 font-bold border-b border-rose-100 pb-1 shrink-0 text-xs">
                             <i class="fa-regular fa-face-sad-tear text-lg text-rose-500"></i>
                             <span>待改進區</span>
-                            <span id="bad-count" class="ml-auto text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded-full">0 個</span>
+                            <span id="bad-count" class="ml-auto text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
-                        <!-- 放置區容器 — 加入 justify-items-center 以確保卡片不被拉伸並整齊置中 -->
-                        <div id="bad-zone" class="drag-zone flex-grow overflow-y-auto grid grid-cols-1 xl:grid-cols-2 gap-2 p-1 min-h-0 rounded-xl transition-all justify-items-center" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'bad')">
-                            <div class="placeholder col-span-full h-full flex items-center justify-center text-rose-400 text-xs text-center italic">
+                        <!-- 放置區容器 — 改為 flex-col 由上往下單欄排列，去除分散，靠緊頂部 -->
+                        <div id="bad-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-2 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'bad')">
+                            <div class="placeholder py-8 flex items-center justify-center text-rose-400 text-xs text-center italic">
                                 拖曳學生至此
                             </div>
                         </div>
@@ -256,8 +256,8 @@
                 <table class="w-full border-collapse text-center">
                     <thead>
                         <tr id="hw-table-header" class="bg-amber-100/50 text-[#78350f] font-bold text-sm">
-                            <!-- 首欄：標題改為「登記」，並恢復為原始寬度 min-w-[100px] -->
-                            <th class="p-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-sm text-center">登記</th>
+                            <!-- 首欄：更名為「登記」且設定左右、上下完美置中對齊 -->
+                            <th class="p-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-sm text-center align-middle">登記</th>
                             <!-- 動態生成的學生座號+姓名欄位會插在這裡 -->
                         </tr>
                     </thead>
@@ -339,14 +339,14 @@
 
         // 3. 處理預設範例資料 (更新為雁婷老師的真實學生名單)
         function loadDemoStudents() {
-            const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
+            const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳雷伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
             document.getElementById('text-input').value = demoText;
             switchImportTab('text');
             generateFromText();
             
             // 預設帶入三個作業項目方便老師直接檢視效果
             if (homeworkList.length === 0) {
-                homeworkList = ["國語", "數學", "閱讀", "其他"];
+                homeworkList = ["國語", "數學", "閱讀"];
                 renderHomeworkTable();
             }
         }
@@ -738,6 +738,7 @@
             });
         }
 
+        // 好表現與待改進人數統計改為計算「不重複學生人數」，單位為「人」
         function updateCounts() {
             const goodZone = document.getElementById('good-zone');
             const badZone = document.getElementById('bad-zone');
@@ -745,13 +746,23 @@
             const goodCards = goodZone.querySelectorAll('.student-card');
             const badCards = badZone.querySelectorAll('.student-card');
 
-            let totalGoodCount = 0;
+            // 使用 Set 存入 "座號-姓名" 以精確計算不重複學生人數 (幾人)
+            const uniqueGoodStudents = new Set();
             goodCards.forEach(card => {
-                totalGoodCount += parseInt(card.getAttribute('data-count') || 1);
+                const number = card.getAttribute('data-number');
+                const name = card.getAttribute('data-name');
+                uniqueGoodStudents.add(`${number}-${name}`);
             });
 
-            document.getElementById('good-count').textContent = `${totalGoodCount} 個`;
-            document.getElementById('bad-count').textContent = `${badCards.length} 個`;
+            const uniqueBadStudents = new Set();
+            badCards.forEach(card => {
+                const number = card.getAttribute('data-number');
+                const name = card.getAttribute('data-name');
+                uniqueBadStudents.add(`${number}-${name}`);
+            });
+
+            document.getElementById('good-count').textContent = `${uniqueGoodStudents.size} 人`;
+            document.getElementById('bad-count').textContent = `${uniqueBadStudents.size} 人`;
         }
 
         // ==========================================
@@ -1034,7 +1045,7 @@
             const tableHeader = document.getElementById('hw-table-header');
             const tableBody = document.getElementById('hw-table-body');
 
-            // 1. 重構表頭：首欄固定為「登記」，寬度還原為 140px
+            // 1. 重構表頭：首欄固定為「登記」，寬度還原為 140px (目前是 HTML 中寫 min-w-[100px]、我們保持不變並置中)
             tableHeader.innerHTML = `
                 <th class="p-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-sm text-center">
                     登記
@@ -1091,12 +1102,13 @@
                 tr.className = "hover:bg-amber-50/40 transition-colors";
 
                 // 第一直欄：作業名稱 (固定最左側，滑動時不遮擋) — 寬度也同步還原為 140px，字體與刪除按鈕恢復原大小
+                // 重要優化：增加 text-center，並使用絕對定位處理刪除按鈕，讓作業項目名稱完美上下左右置中對齊
                 const hwTd = document.createElement('td');
-                hwTd.className = "p-2.5 border-b border-r border-amber-200 bg-white font-semibold text-[#78350f] sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)] group min-w-[100px]";
+                hwTd.className = "p-2.5 border-b border-r border-amber-200 bg-white font-semibold text-[#78350f] sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)] group min-w-[100px] text-center align-middle";
                 hwTd.innerHTML = `
-                    <div class="flex items-center justify-between gap-1.5 px-1">
-                        <span class="truncate text-xs md:text-sm font-bold" title="${hw}">${hw}</span>
-                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0" title="刪除此作業">
+                    <div class="flex items-center justify-center gap-1.5 px-1 relative w-full h-full">
+                        <span class="truncate text-xs md:text-sm font-bold mx-auto" title="${hw}">${hw}</span>
+                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0 absolute right-1.5" title="刪除此作業">
                             <i class="fa-solid fa-circle-xmark"></i>
                         </button>
                     </div>
