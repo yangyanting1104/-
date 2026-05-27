@@ -235,7 +235,7 @@
                     <i class="fa-solid fa-clipboard-check text-amber-600"></i>
                     作業檢核區
                 </h2>
-                <!-- 新增作業輸入列 -->
+                <!-- 新增作業輸入列 (已修正 placeholder 提示字為「國習」) -->
                 <div class="flex items-center gap-2 bg-amber-50 p-1.5 rounded-xl border border-amber-100 max-w-lg w-full">
                     <input type="text" id="hw-name-input" placeholder="請打字輸入作業名稱 (例如：國習、數單)" class="flex-grow text-sm bg-white border border-amber-200 rounded-lg py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
                     <button onclick="addHomeworkItem()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-1.5 px-4 rounded-lg transition-all shadow-sm shrink-0">
@@ -249,16 +249,16 @@
                 <table class="w-full border-collapse text-center">
                     <thead>
                         <tr id="hw-table-header" class="bg-amber-100/50 text-[#78350f] font-bold text-sm">
-                            <!-- 首欄：學生座號+姓名 -->
-                            <th class="p-3 border-b border-r border-amber-200/80 min-w-[150px] sticky left-0 bg-amber-50 z-20">學生座號 + 姓名</th>
-                            <!-- 動態生成的作業表頭會插在這裡 -->
+                            <!-- 首欄：作業名稱 (固定最左側) -->
+                            <th class="p-3 border-b border-r border-amber-200/80 min-w-[140px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold">作業名稱</th>
+                            <!-- 動態生成的學生座號+姓名欄位會插在這裡 -->
                         </tr>
                     </thead>
                     <tbody id="hw-table-body" class="divide-y divide-amber-100 text-xs md:text-sm">
-                        <!-- 動態生成的學生列與核取儲存格會在這裡呈現 -->
+                        <!-- 動態生成的作業列與核取儲存格會在這裡呈現 -->
                         <tr>
                             <td class="p-8 text-gray-400 italic text-center" colspan="100%">
-                                <i class="fa-solid fa-circle-info mr-1"></i> 請先至上方匯入學生名單，並於右上方輸入作業名稱以啟用檢核表格。
+                                <i class="fa-solid fa-circle-info mr-1"></i> 請先至上方匯入學生名單，並於右上角輸入作業名稱以啟用檢核表格。
                             </td>
                         </tr>
                     </tbody>
@@ -332,7 +332,7 @@
 
         // 3. 處理預設範例資料
         function loadDemoStudents() {
-            const demoText = "01 陳小明\n02 林大同\n03 張美美\n04 王大華\n05 李小婷\n06 趙子龍\n07 黃阿寶\n08 吳妙妙";
+            const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳雷伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
             document.getElementById('text-input').value = demoText;
             switchImportTab('text');
             generateFromText();
@@ -967,7 +967,7 @@
 
 
         // ==========================================
-        // 作業檢核區 專屬邏輯
+        // 作業檢核區 專屬邏輯 (已升級為：橫列為學生，直欄為作業)
         // ==========================================
 
         // 新增作業項目
@@ -1012,40 +1012,44 @@
 
             if (isUnfinished) {
                 homeworkStatus[statusKey] = false;
-                cellElement.className = "p-2.5 border-b border-r border-amber-100 bg-emerald-50 text-emerald-600 text-center font-bold text-sm cursor-pointer hover:bg-emerald-100 transition-colors select-none";
+                cellElement.className = "p-2.5 border-b border-r border-amber-100 bg-emerald-50 text-emerald-600 text-center font-bold text-sm cursor-pointer hover:bg-emerald-100 transition-colors select-none min-w-[110px]";
                 cellElement.innerHTML = `<i class="fa-solid fa-check scale-110"></i>`;
             } else {
                 homeworkStatus[statusKey] = true;
-                cellElement.className = "p-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-sm cursor-pointer hover:bg-rose-200 transition-colors select-none";
+                cellElement.className = "p-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-sm cursor-pointer hover:bg-rose-200 transition-colors select-none min-w-[110px]";
                 cellElement.innerHTML = `<i class="fa-solid fa-xmark scale-110"></i>`;
             }
         }
 
-        // 繪製與同步作業檢核表格
+        // 繪製與同步作業檢核表格 (置換欄與列的呈現)
         function renderHomeworkTable() {
             const tableHeader = document.getElementById('hw-table-header');
             const tableBody = document.getElementById('hw-table-body');
 
+            // 1. 重構表頭：首欄固定為「作業名稱」，後續為「學生座號 + 姓名」 (水平橫列一字排開)
             tableHeader.innerHTML = `
-                <th class="p-3 border-b border-r border-amber-200/80 min-w-[140px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">
-                    學生座號 + 姓名
+                <th class="p-3 border-b border-r border-amber-200/80 min-w-[140px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold">
+                    作業名稱
                 </th>
             `;
 
-            homeworkList.forEach((hw, idx) => {
+            studentsList.forEach(student => {
                 const th = document.createElement('th');
-                th.className = "p-3 border-b border-r border-amber-200/80 min-w-[110px] bg-amber-100/30 text-amber-900 font-bold relative group";
+                th.className = "p-3 border-b border-r border-amber-200/80 min-w-[110px] bg-amber-100/30 text-[#78350f] font-bold text-center";
+                
+                const isEven = parseInt(student.number) % 2 === 0;
+                const bgClass = isEven ? 'bg-amber-100 text-amber-900' : 'bg-orange-100 text-orange-900';
+                
                 th.innerHTML = `
-                    <div class="flex items-center justify-center gap-1.5 px-2">
-                        <span class="truncate">${hw}</span>
-                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 ml-1 text-xs" title="刪除此作業">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                        </button>
+                    <div class="flex items-center justify-center gap-1.5">
+                        <span class="w-5 h-5 flex items-center justify-center rounded-full text-[9px] font-bold ${bgClass} shrink-0">${student.number}</span>
+                        <span class="truncate text-xs md:text-sm">${student.name}</span>
                     </div>
                 `;
                 tableHeader.appendChild(th);
             });
 
+            // 2. 判斷是否有學生與作業
             if (studentsList.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
@@ -1062,44 +1066,48 @@
                     <tr>
                         <td class="p-10 text-gray-400 italic text-center" colspan="100%">
                             <i class="fa-solid fa-folder-open mr-1 block text-2xl mb-1 text-amber-400"></i>
-                            目前作業項目為空。請在右上方打字並點擊「新增作業」按鈕，即可開始登記收繳情形！
+                            目前作業項目為空。請在上方打字並點擊「新增作業」按鈕，即可開始登記收繳情形！
                         </td>
                     </tr>
                 `;
                 return;
             }
 
+            // 3. 填入資料：外層迴圈為作業 (作業在左側垂直長出直欄)，內層迴圈為學生 (學生在橫列一字排開)
             tableBody.innerHTML = '';
 
-            studentsList.forEach(student => {
+            homeworkList.forEach((hw, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-amber-50/40 transition-colors";
 
-                const nameTd = document.createElement('td');
-                nameTd.className = "p-2.5 border-b border-r border-amber-200 bg-white font-semibold text-[#78350f] sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)] flex items-center gap-1.5 min-w-[140px]";
-                
-                const isEven = parseInt(student.number) % 2 === 0;
-                const bgClass = isEven ? 'bg-amber-100 text-amber-900' : 'bg-orange-100 text-orange-900';
-                
-                nameTd.innerHTML = `
-                    <span class="w-5 h-5 flex items-center justify-center rounded-full text-[9px] font-bold ${bgClass} shrink-0">${student.number}</span>
-                    <span class="truncate text-xs md:text-sm">${student.name}</span>
+                // 第一直欄：作業名稱 (固定最左側，滑動時不遮擋，且附帶刪除按鈕)
+                const hwTd = document.createElement('td');
+                hwTd.className = "p-2.5 border-b border-r border-amber-200 bg-white font-semibold text-[#78350f] sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)] group min-w-[140px]";
+                hwTd.innerHTML = `
+                    <div class="flex items-center justify-between gap-1.5 px-1">
+                        <span class="truncate text-xs md:text-sm font-bold">${hw}</span>
+                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0" title="刪除此作業">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
                 `;
-                tr.appendChild(nameTd);
+                tr.appendChild(hwTd);
 
-                homeworkList.forEach(hw => {
+                // 後續為每位學生的繳交儲存格
+                studentsList.forEach(student => {
                     const cellTd = document.createElement('td');
                     const statusKey = `${student.number}-${student.name}_${hw}`;
                     const isUnfinished = homeworkStatus[statusKey] !== false;
 
                     if (isUnfinished) {
-                        cellTd.className = "p-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-sm cursor-pointer hover:bg-rose-200 transition-colors select-none";
+                        cellTd.className = "p-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-sm cursor-pointer hover:bg-rose-200 transition-colors select-none min-w-[110px]";
                         cellTd.innerHTML = `<i class="fa-solid fa-xmark scale-110"></i>`;
                     } else {
-                        cellTd.className = "p-2.5 border-b border-r border-amber-100 bg-emerald-50 text-emerald-600 text-center font-bold text-sm cursor-pointer hover:bg-emerald-100 transition-colors select-none";
+                        cellTd.className = "p-2.5 border-b border-r border-amber-100 bg-emerald-50 text-emerald-600 text-center font-bold text-sm cursor-pointer hover:bg-emerald-100 transition-colors select-none min-w-[110px]";
                         cellTd.innerHTML = `<i class="fa-solid fa-check scale-110"></i>`;
                     }
 
+                    // 綁定點擊切換狀態事件
                     cellTd.onclick = function() {
                         toggleHwCell(student.number, student.name, hw, cellTd);
                     };
