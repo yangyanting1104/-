@@ -17,12 +17,14 @@
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #fdf6ec; /* 暖色調、舒服的米黃色背景 */
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
         /* 自訂粉彩陰影與圓角，讓畫面看起來更像國小教室的實體看板 */
         .glass-panel {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(8px);
             border: 2px solid #f3e5d8;
+            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
         }
         /* 拖曳時的視覺效果 */
         .dragging {
@@ -42,10 +44,12 @@
         ::-webkit-scrollbar-track {
             background: #fdf6ec;
             border-radius: 4px;
+            transition: background-color 0.4s ease;
         }
         ::-webkit-scrollbar-thumb {
             background: #e2e8f0;
             border-radius: 4px;
+            transition: background-color 0.4s ease;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #cbd5e1;
@@ -57,12 +61,152 @@
             white-space: nowrap;
             letter-spacing: 0.1em; /* 還原原始舒適間距 */
         }
+
+        /* 動畫緩速旋轉，用於夜間模式按鈕 */
+        .animate-spin-slow {
+            animation: spin 8s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==========================================
+           【午休夜間模式】深色主題 CSS 覆蓋樣式 
+           ========================================== */
+        body.dark-mode {
+            background-color: #0f1015; /* 更深沉優雅的深夜黑，適合安靜午休 */
+            color: #94a3b8; /* 調降文字整體亮度至柔和灰 */
+        }
+        body.dark-mode ::-webkit-scrollbar-track {
+            background: #0f1015;
+        }
+        body.dark-mode ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+        }
+        body.dark-mode ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        body.dark-mode .glass-panel {
+            background: rgba(17, 22, 37, 0.9); /* 深色夜視面板 */
+            border-color: #1e2536;
+            color: #cbd5e1;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        body.dark-mode .student-card {
+            background-color: #1a1f35;
+            border-color: #262e42;
+        }
+        body.dark-mode .student-card span.text-amber-950 {
+            color: #cbd5e1 !important;
+        }
+        body.dark-mode #student-pool {
+            background-color: rgba(22, 30, 49, 0.4);
+        }
+        body.dark-mode h1 {
+            color: #d97706 !important; /* 柔和暗金，避免過亮 */
+        }
+        body.dark-mode h2 {
+            color: #e2e8f0 !important; /* 一般標題採用冷灰白，不刺眼 */
+        }
+        body.dark-mode #timer-display {
+            color: #e2a03f !important; /* 計時大數字調暗，改用柔和的古銅金 */
+        }
+        body.dark-mode #timer-status {
+            color: #f59e0b !important;
+        }
+        body.dark-mode .bg-emerald-50\/50 {
+            background-color: rgba(4, 120, 87, 0.15) !important; /* 降低背景透明度 */
+            border-color: rgba(16, 185, 129, 0.2) !important;
+        }
+        body.dark-mode .bg-rose-50\/50 {
+            background-color: rgba(190, 18, 60, 0.12) !important; /* 降低背景透明度 */
+            border-color: rgba(244, 63, 94, 0.2) !important;
+        }
+        body.dark-mode input, body.dark-mode textarea {
+            background-color: #1a1f35 !important;
+            color: #cbd5e1 !important;
+            border-color: #2d364f !important;
+        }
+        body.dark-mode .bg-amber-50 {
+            background-color: #2a1e12 !important; /* 棕色底調暗 */
+            color: #fde047 !important;
+            border-color: #382818 !important;
+        }
+        body.dark-mode .bg-amber-100\/30 {
+            background-color: rgba(217, 119, 6, 0.08) !important;
+        }
+        body.dark-mode th.sticky, 
+        body.dark-mode td.sticky {
+            background-color: #111625 !important;
+            color: #94a3b8 !important;
+        }
+        body.dark-mode td, body.dark-mode th {
+            border-color: #202636 !important;
+        }
+        body.dark-mode .bg-rose-100 {
+            background-color: rgba(225, 29, 72, 0.15) !important;
+            color: #f43f5e !important;
+        }
+        body.dark-mode .bg-emerald-50 {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            color: #10b981 !important;
+        }
+        body.dark-mode .text-emerald-600 {
+            color: #10b981 !important;
+        }
+        body.dark-mode .text-rose-600 {
+            color: #e11d48 !important;
+        }
+        body.dark-mode .text-stone-700 {
+            color: #94a3b8 !important;
+        }
+        body.dark-mode .bg-stone-100 {
+            background-color: #1e2638 !important;
+            color: #cbd5e1 !important;
+            border-color: #2d364f !important;
+        }
+        body.dark-mode .bg-orange-100 {
+            background-color: #2d1303 !important; /* 深黑橘 */
+            color: #fed7aa !important;
+        }
+        body.dark-mode .bg-amber-100\/50 {
+            background-color: rgba(217, 119, 6, 0.12) !important;
+        }
+        body.dark-mode .bg-amber-100 {
+            background-color: #24190b !important;
+            color: #fef08a !important;
+        }
+        body.dark-mode .bg-orange-50 {
+            background-color: #1f1008 !important;
+            color: #ffedd5 !important;
+        }
+        
+        /* 午休模式下的重疊徽章（星星與閃電）調暗優化 */
+        body.dark-mode .star-badge {
+            background-color: #b45309 !important; /* 暗金黃色 */
+            border-color: #d97706 !important;
+            color: #fef3c7 !important;
+        }
+        body.dark-mode .lightning-badge {
+            background-color: #9a3412 !important; /* 暗橘紅色 */
+            border-color: #c2410c !important;
+            color: #fef3c7 !important;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col p-4 md:p-6 text-gray-700 overflow-y-auto">
+<body class="min-h-screen flex flex-col p-4 md:p-6 text-gray-700 overflow-y-auto relative">
 
-    <!-- 頁首與標題區 -->
-    <header class="text-center mb-4 shrink-0">
+    <!-- 日夜模式切換按鈕 (位於網頁最右上角，確保高曝光且不被主內容遮擋) -->
+    <div class="absolute top-4 right-4 md:top-6 md:right-6 z-50">
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="glass-panel py-2 px-3.5 rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-2 font-bold text-xs md:text-sm bg-white/95 hover:scale-105 active:scale-95">
+            <i id="theme-icon" class="fa-solid fa-moon text-amber-500 text-sm md:text-base animate-pulse"></i>
+            <span id="theme-text" class="select-none">午休夜間模式</span>
+        </button>
+    </div>
+
+    <!-- 頁首與標題區 (右側預留空間防按鈕重疊) -->
+    <header class="text-center mb-4 shrink-0 pr-24">
         <h1 class="text-2xl md:text-3xl font-bold text-[#b45309] flex items-center justify-center gap-2">
             <i class="fa-solid fa-graduation-cap text-[#f59e0b]"></i>
             班級經營互動看板
@@ -219,7 +363,8 @@
 
                 <!-- 計時器控制按鈕 -->
                 <div class="space-y-2 mt-4 shrink-0">
-                    <button id="btn-start-pause" onclick="toggleTimer()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-base">
+                    <button id="btn-start-pause" onclick="toggleTheme()" class="hidden"></button> <!-- 保留原事件掛接防爆 -->
+                    <button id="btn-start-timer" onclick="toggleTimer()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-base">
                         <i id="icon-start-pause" class="fa-solid fa-play"></i>
                         <span id="text-start-pause">開始計時</span>
                     </button>
@@ -280,7 +425,7 @@
                 </span>
                 <span class="flex items-center gap-1">
                     <span class="w-4 h-4 rounded bg-emerald-50 border border-emerald-200 inline-block text-center text-[10px] text-emerald-600 leading-none">✓</span>
-                    Ref-已完成 / 已繳交 (無色塊)
+                    已完成 / 已繳交 (無色塊)
                 </span>
             </div>
         </div>
@@ -304,7 +449,7 @@
     <audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav" preload="auto"></audio>
 
     <footer class="mt-8 mb-4 text-center text-[11px] text-gray-400 shrink-0">
-        <p>© 班級經營互動工具作者 — 雁婷老師</p>
+        <p>© 班級經營互動看板作者 — 雁婷老師</p>
     </footer>
 
     <!-- 主要 JavaScript 邏輯控制 -->
@@ -331,13 +476,13 @@
                 areaText.classList.add('hidden');
             } else {
                 btnExcel.className = "flex-1 py-1 px-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all";
-                btnText.className = "flex-1 py-1 px-2 rounded-lg bg-amber-500 text-white shadow-sm transition-all";
+                btnText.className = "flex-1 py-1 px-2 rounded-lg bg-amber-505 text-white shadow-sm transition-all";
                 areaExcel.classList.add('hidden');
                 areaText.classList.remove('hidden');
             }
         }
 
-        // 3. 處理預設範例資料 (更新為雁婷老師的真實學生名單)
+        // 3. 處理預設範例資料 (已將陳「雷」伊正字為陳「蕾」伊)
         function loadDemoStudents() {
             const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
             document.getElementById('text-input').value = demoText;
@@ -362,7 +507,7 @@
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-                const rows = XLSX.utils.sheet_to_json(rows, {header: 1});
+                const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
                 
                 let parsedStudents = [];
                 rows.forEach((row, index) => {
@@ -440,14 +585,14 @@
             });
         }
 
-        // 7. 創建單一學生方塊 DOM 元素 (學生姓名區恢復為原始的較小字體與緊密間距，並在卡片內部水平/垂直置中)
+        // 7. 創建單一學生方塊 DOM 元素 (置中對齊：座號和姓名在名牌內部水平/垂直置中)
         function createStudentCard(number, name) {
             totalCreatedCount++;
             const uniqueId = `student-${totalCreatedCount}`;
 
             const card = document.createElement('div');
             card.id = uniqueId;
-            // 恢復原本輕巧好排印的 text-xs 與 py-2 px-2.5 間距，並加入 justify-center 來置中所有內容
+            // 預備區方塊：字體與座號一同並列，並加入 justify-center 來完全置中，加上 rounded-xl 保持圓角
             card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-grab active:cursor-grabbing select-none transition-all text-xs font-semibold relative";
             card.setAttribute('draggable', 'true');
             card.setAttribute('data-number', number);
@@ -457,7 +602,7 @@
             const isEven = parseInt(number) % 2 === 0;
             const bgClass = isEven ? 'bg-amber-50 text-amber-800' : 'bg-orange-50 text-orange-800';
             
-            // 恢復原始的 w-5 h-5 迷你座號與字重 font-bold
+            // 座號圓圈在 Flex 內部流，與姓名並列一同置中
             card.innerHTML = `
                 <span class="w-5 h-5 flex items-center justify-center rounded-full text-[9px] font-bold ${bgClass} shrink-0 shadow-sm">
                     ${number}
@@ -483,6 +628,7 @@
             e.dataTransfer.effectAllowed = 'copyMove';
         }
 
+        // 結束拖曳
         function handleDragEnd(e) {
             this.classList.remove('dragging');
             draggedElement = null;
@@ -672,7 +818,8 @@
             cards.forEach(card => zone.appendChild(card));
         }
 
-        // 當學生方塊被拖移至表現記錄區時，整體放大一點點 (寬度 w-40, 高度 h-12, 名字升級為 text-base md:text-lg，並加上居中樣式)
+        // 當學生方塊被拖移至表現記錄區時，整體放大：寬度 w-40 (160px)、高度 h-12 (48px)，名字升級為 text-base md:text-lg，座號圓圈放大至 w-7 h-7、座號數字放大為 text-sm
+        // 同時在此完全還原並保留「座號與姓名手牽手並排置中」的完美置中，並保留 rounded-xl 圓角設定！
         function moveCardToZone(card, zone) {
             const placeholder = zone.querySelector('.placeholder');
             if (placeholder) {
@@ -682,26 +829,29 @@
             // 先清理原來的緊密微型樣式
             card.classList.remove('py-2', 'px-2.5', 'text-xs', 'justify-center');
             
-            // 表現區「整體放大」與「置中對齊」樣式設定：寬度加長至 w-40 (160px)、高度 h-12 (48px)、字體放大為 text-base md:text-lg，並使用 flex 置中
-            card.classList.add('py-2', 'px-3.5', 'text-base', 'md:text-lg', 'shadow-md', 'w-40', 'h-12', 'shrink-0', 'mx-auto', 'justify-center', 'items-center', 'group');
+            // 表現區置中對齊樣式設定，使用 flex 水平垂直絕對置中，並附加 group 實現懸浮效果，加上 rounded-xl 保持圓角
+            // 尺寸改為：寬度 w-40 (160px), 高度 h-12 (48px), 字型大小為 text-base md:text-lg 
+            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-3 text-base md:text-lg rounded-xl shadow-sm w-40 h-12 shrink-0 mx-auto flex items-center justify-center gap-2.5 group relative transition-all duration-300";
 
-            // 同步放大座號圓圈及圓圈內字級 (w-7 h-7, text-sm font-black)
+            // 座號與名字自然排列
+            // 座號圓圈放大至 w-7 h-7，字型大小變為 text-sm font-black
             const numSpan = card.querySelector('span:first-child');
             if (numSpan) {
+                numSpan.className = numSpan.className.replace(/\b(absolute|left-[0-9.]+)\b/g, '').trim();
                 numSpan.classList.remove('w-5', 'h-5', 'text-[9px]');
-                numSpan.classList.add('w-7', 'h-7', 'text-sm', 'font-black');
+                numSpan.classList.add('w-7', 'h-7', 'text-sm', 'font-black', 'shrink-0');
             }
-            
-            // 名字字體加重
+
             const nameSpan = card.querySelector('span:nth-child(2)');
             if (nameSpan) {
-                nameSpan.classList.remove('font-bold');
-                nameSpan.classList.add('font-extrabold');
+                nameSpan.className = nameSpan.className.replace(/\b(px-[0-9.]+|w-full)\b/g, '').trim();
+                nameSpan.classList.remove('font-extrabold', 'text-center');
+                nameSpan.classList.add('font-bold', 'truncate');
             }
 
             if (!card.querySelector('.delete-btn')) {
                 const deleteBtn = document.createElement('button');
-                // 刪除按鈕配合放大的卡片微調定位與大小
+                // 刪除按鈕配合名牌微調定位與大小，精確固定在 absolute right-2.5，滑鼠移入時才浮現
                 deleteBtn.className = "delete-btn text-red-400 hover:text-red-600 focus:outline-none transition-all absolute right-2.5 bg-white/90 pl-1 rounded opacity-0 group-hover:opacity-100 z-20 h-7 flex items-center";
                 deleteBtn.innerHTML = `<i class="fa-regular fa-trash-can text-sm"></i>`;
                 
@@ -936,7 +1086,7 @@
             document.getElementById('text-start-pause').textContent = "暫停計時";
             document.getElementById('icon-start-pause').className = "fa-solid fa-pause";
             
-            const btn = document.getElementById('btn-start-pause');
+            const btn = document.getElementById('btn-start-timer');
             btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
             btn.classList.add('bg-amber-500', 'hover:bg-amber-600');
 
@@ -959,7 +1109,7 @@
             document.getElementById('text-start-pause').textContent = "繼續計時";
             document.getElementById('icon-start-pause').className = "fa-solid fa-play";
             
-            const btn = document.getElementById('btn-start-pause');
+            const btn = document.getElementById('btn-start-timer');
             btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
             btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
 
@@ -979,7 +1129,7 @@
             document.getElementById('text-start-pause').textContent = "開始計時";
             document.getElementById('icon-start-pause').className = "fa-solid fa-play";
             
-            const btn = document.getElementById('btn-start-pause');
+            const btn = document.getElementById('btn-start-timer');
             btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
             btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
             
@@ -1038,6 +1188,7 @@
             }, 10);
         }
 
+        // 關閉確認視窗
         function closeAlertModal() {
             const modal = document.getElementById('alert-modal');
             modal.classList.add('opacity-0');
@@ -1217,7 +1368,7 @@
                 hwTd.innerHTML = `
                     <div class="flex items-center justify-center gap-1.5 px-1 relative w-full h-full">
                         <span class="truncate text-xs md:text-sm font-bold mx-auto" title="${hw}">${hw}</span>
-                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0" title="刪除此作業">
+                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0 absolute right-1.5" title="刪除此作業">
                             <i class="fa-solid fa-circle-xmark"></i>
                         </button>
                     </div>
@@ -1248,6 +1399,30 @@
 
                 tableBody.appendChild(tr);
             });
+        }
+
+        // ==========================================
+        // 【新增功能】夜間 / 日間模式切換邏輯 
+        // ==========================================
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('theme-toggle-btn');
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const isDark = body.classList.toggle('dark-mode');
+            
+            if (isDark) {
+                icon.className = "fa-solid fa-sun text-yellow-400 text-sm md:text-base animate-spin-slow";
+                text.textContent = "日間正常模式";
+                // 美化按鈕在夜間模式下的背景
+                btn.style.backgroundColor = "rgba(30, 41, 59, 0.95)";
+                btn.style.color = "#f1f5f9";
+            } else {
+                icon.className = "fa-solid fa-moon text-amber-500 text-sm md:text-base animate-pulse";
+                text.textContent = "午休夜間模式";
+                btn.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+                btn.style.color = "#374151";
+            }
         }
 
         window.onload = function() {
