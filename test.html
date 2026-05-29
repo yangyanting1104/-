@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小血滴的生理用品大冒險</title>
+    <!-- 引入 Tailwind CSS 讓介面更加現代好看 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 載入可愛的圓體中文字型 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* 使用老師提供的米黃格子背景，設定為重複平鋪 */
+            background-image: url('米黃格子 (1).png');
+            background-repeat: repeat;
+            background-size: 300px; /* 調整格子大小配合遊戲感 */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* 遊戲畫布容器 */
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 主角：小血滴 */
+        .character {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            transition: all 0.15s ease-out;
+            z-index: 20;
+            /* 已移除會導致透明度變高的 mix-blend-mode，讓去背好的圖片能 100% 清晰呈現 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        }
+
+        .character img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* 生理用品標籤與外觀 */
+        .item {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .item-icon {
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: transform 0.2s ease;
+        }
+
+        .item:hover .item-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .item-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #4a3728;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid #e2d2bd;
+            margin-top: 2px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* 得分動畫特效 */
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+        }
+
+        .score-effect {
+            position: absolute;
+            color: #e11d48;
+            font-weight: 900;
+            font-size: 24px;
+            pointer-events: none;
+            z-index: 50;
+            animation: floatUp 0.8s ease-out forwards;
+            text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff, 2px -2px 0px #fff, -2px 2px 0px #fff;
+        }
+
+        /* 虛擬搖桿/方向按鈕（手機或平板可用） */
+        .control-btn {
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 2px solid #e2d2bd;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.1s ease;
+        }
+        .control-btn:active {
+            transform: scale(0.9);
+            background-color: #fce7f3;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <!-- 上方資訊列 -->
+        <div class="absolute top-4 left-4 right-4 flex justify-between items-center z-30 pointer-events-none">
+            <!-- 標題與介紹 -->
+            <div class="bg-white/95 backdrop-blur-sm border-2 border-amber-200/60 p-3 rounded-2xl shadow-md max-w-xs md:max-w-md pointer-events-auto">
+                <h1 class="text-lg md:text-xl font-bold text-rose-600 flex items-center gap-1">
+                    🩸 小血滴的生理用品大冒險
+                </h1>
+                <p class="text-xs md:text-sm text-amber-900/80 mt-1">
+                    使用 <kbd class="px-1.5 py-0.5 bg-gray-100 border rounded shadow text-xs">↑</kbd> <kbd class="px-1.5 py-0.5 bg-gray-100 border rounded shadow text-xs">↓</kbd> <kbd class="px-1.5 py-0.5 bg-gray-100 border rounded shadow text-xs">←</kbd> <kbd class="px-1.5 py-0.5 bg-gray-100 border rounded shadow text-xs">→</kbd> 鍵或畫面按鈕，帶領小血滴認識生理用品吧！
+                </p>
+            </div>
+
+            <!-- 計分板 -->
+            <div class="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold px-6 py-3 rounded-2xl shadow-lg border-2 border-white flex flex-col items-center pointer-events-auto">
+                <span class="text-xs uppercase tracking-wider opacity-90">目前得分</span>
+                <span id="score-val" class="text-3xl font-black tabular-nums">0</span>
+            </div>
+        </div>
+
+        <!-- 遊戲主舞台 (小血滴與生理用品會被渲染在此) -->
+        <div id="stage" class="w-full h-full relative"></div>
+
+        <!-- 介紹浮板 (點擊生理用品可看介紹) -->
+        <div id="intro-modal" class="absolute bottom-6 left-6 right-6 md:left-1/2 md:-translate-x-1/2 md:max-w-lg bg-white/95 backdrop-blur-md border-2 border-rose-200 p-4 rounded-2xl shadow-xl z-40 transform translate-y-32 opacity-0 transition-all duration-300 pointer-events-none">
+            <div class="flex items-center gap-4">
+                <div id="modal-icon-container" class="w-16 h-16 flex-shrink-0 bg-rose-50 rounded-xl p-2 border border-rose-100">
+                    <!-- SVG 會動態插入 -->
+                </div>
+                <div>
+                    <h2 id="modal-title" class="text-lg font-bold text-rose-700">生理用品</h2>
+                    <p id="modal-desc" class="text-sm text-gray-600 mt-1">點擊或用小血滴去碰碰看，認識它們的用途喔！</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 手機平板專用：畫面方向鍵 -->
+        <div class="absolute bottom-6 right-6 flex flex-col items-center gap-1 z-30 md:opacity-80 lg:opacity-60">
+            <button onclick="movePlayer(0, -1)" class="control-btn w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-amber-800">▲</button>
+            <div class="flex gap-4">
+                <button onclick="movePlayer(-1, 0)" class="control-btn w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-amber-800">◀</button>
+                <div class="w-12 h-12"></div> <!-- 空白間隔 -->
+                <button onclick="movePlayer(1, 0)" class="control-btn w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-amber-800">▶</button>
+            </div>
+            <button onclick="movePlayer(0, 1)" class="control-btn w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-amber-800">▼</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 遊戲狀態與參數設定 ---
+        let score = 0;
+        const GRID_SIZE = 80; // 隱形網格大小 (單位：像素)
+        
+        // 角色位置 (網格座標)
+        let player = {
+            x: 2,
+            y: 3,
+            element: null
+        };
+
+        // 舞台大小資訊
+        let stageCols = 10;
+        let stageRows = 8;
+
+        // 五個生理用品的定義與知識介紹
+        const itemsData = [
+            {
+                id: 'pad',
+                name: '衛生棉',
+                desc: '最常見的生理用品，貼在內褲上使用，吸收排出的經血。有分不同的長度來因應經血量喔！',
+                svg: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="25" y="10" width="50" height="80" rx="25" fill="#f0fdf4" stroke="#4ade80" stroke-width="4"/>
+                        <path d="M15 35 C15 35, 25 50, 15 65" stroke="#4ade80" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <path d="M85 35 C85 35, 75 50, 85 65" stroke="#4ade80" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <path d="M25 50 H75" stroke="#bbf7d0" stroke-width="2" stroke-dasharray="4 4"/>
+                        <path d="M35 30 H65 M35 70 H65 M35 50 H65" stroke="#bbf7d0" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="12" fill="#dcfce7"/>
+                      </svg>`
+            },
+            {
+                id: 'tampon',
+                name: '衛生棉條',
+                desc: '置入陰道內直接吸收經血的棉質圓條，活動更自由、乾爽，適合運動、游泳時使用。',
+                svg: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="40" y="15" width="20" height="55" rx="10" fill="#f0f9ff" stroke="#38bdf8" stroke-width="4"/>
+                        <path d="M50 70 V90" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+                        <circle cx="50" cy="90" r="3" fill="#94a3b8"/>
+                        <path d="M45 25 H55 M45 35 H55 M45 45 H55" stroke="#bae6fd" stroke-width="2"/>
+                      </svg>`
+            },
+            {
+                id: 'menstrual-cup',
+                name: '月經量杯',
+                desc: '俗稱月亮杯，由醫療級矽膠製成，摺疊後放入陰道中收集經血。可以重複清洗使用，非常環保！',
+                svg: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M30 20 C30 20, 30 65, 50 80 C70 65, 70 20, 70 20 Z" fill="#fdf2f8" stroke="#f43f5e" stroke-width="4"/>
+                        <ellipse cx="50" cy="20" rx="20" ry="6" fill="#fbcfe8" stroke="#f43f5e" stroke-width="4"/>
+                        <rect x="48" y="80" width="4" height="12" rx="2" fill="#f43f5e"/>
+                        <path d="M38 40 C45 45, 55 45, 62 40" stroke="#fbcfe8" stroke-width="2" fill="none"/>
+                      </svg>`
+            },
+            {
+                id: 'disc',
+                name: '月經碟片',
+                desc: '置於子宮頸下方的扁平彈性碟片，容量大且不阻礙生活。同樣是由安全矽膠製成，可重複使用。',
+                svg: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="50" cy="50" rx="35" ry="25" fill="#faf5ff" stroke="#a855f7" stroke-width="4"/>
+                        <ellipse cx="50" cy="50" rx="28" ry="18" fill="#f3e8ff" stroke="#c084fc" stroke-width="2" stroke-dasharray="3 3"/>
+                        <path d="M30 50 C40 55, 60 55, 70 50" stroke="#c084fc" stroke-width="3" fill="none"/>
+                      </svg>`
+            },
+            {
+                id: 'period-panties',
+                name: '月經內褲',
+                desc: '具有多層高科技吸收、防漏結構的特製內褲。可以直接穿著吸收經血，清洗後可重複穿著。',
+                svg: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 25 H85 V35 C85 55, 70 75, 50 75 C30 75, 15 55, 15 35 Z" fill="#fff7ed" stroke="#f97316" stroke-width="4"/>
+                        <path d="M15 35 C25 40, 75 40, 85 35" stroke="#ffedd5" stroke-width="3" fill="none"/>
+                        <path d="M35 55 C45 60, 55 60, 65 55" stroke="#f97316" stroke-width="2" stroke-dasharray="4 2" fill="none"/>
+                        <rect x="45" y="20" width="10" height="8" rx="2" fill="#fdba74"/>
+                      </svg>`
+            }
+        ];
+
+        // 記錄畫面上目前生理用品的位置
+        let activeItems = [];
+
+        // --- 網頁載入完成後的初始化 ---
+        window.onload = function() {
+            initGame();
+            
+            // 監聽鍵盤事件操控主角
+            window.addEventListener('keydown', handleKeyDown);
+
+            // 調整視窗大小時，重新計算網格
+            window.addEventListener('resize', handleResize);
+        };
+
+        // 初始化遊戲場景
+        function initGame() {
+            const stage = document.getElementById('stage');
+            stage.innerHTML = ''; // 清空舞台
+
+            // 1. 計算網格行與列
+            calculateGrid();
+
+            // 2. 建立主角小血滴
+            player.element = document.createElement('div');
+            player.element.className = 'character';
+            
+            // 載入老師提供的「小血滴跑步rgb (1).png」
+            const img = document.createElement('img');
+            img.src = '小血滴跑步rgb (1).png';
+            img.alt = '小血滴跑步';
+            // 若圖片載入失敗，則使用備用的精緻 SVG 小血滴，確保遊戲絕對能正常遊玩！
+            img.onerror = function() {
+                player.element.innerHTML = `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                    <path d="M50 10 C50 10, 80 45, 80 65 C80 81.5, 66.5 95, 50 95 C33.5 95, 20 81.5, 20 65 C20 45, 50 10, 50 10 Z" fill="#e11d48"/>
+                    <circle cx="40" cy="60" r="5" fill="#000"/>
+                    <circle cx="60" cy="60" r="5" fill="#000"/>
+                    <path d="M45 75 Q50 80, 55 75" stroke="#000" stroke-width="3" stroke-linecap="round" fill="none"/>
+                    <circle cx="35" cy="65" r="4" fill="#fda4af" opacity="0.6"/>
+                    <circle cx="65" cy="65" r="4" fill="#fda4af" opacity="0.6"/>
+                </svg>`;
+            };
+            player.element.appendChild(img);
+            stage.appendChild(player.element);
+
+            // 把玩家放到起始位置
+            player.x = Math.floor(stageCols / 2);
+            player.y = Math.floor(stageRows / 2);
+            updatePlayerPosition();
+
+            // 3. 散落五個生理用品
+            activeItems = [];
+            itemsData.forEach((itemData) => {
+                spawnItem(itemData);
+            });
+        }
+
+        // 計算目前視窗可容納的隱形格子數量
+        function calculateGrid() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            stageCols = Math.max(5, Math.floor(width / GRID_SIZE));
+            stageRows = Math.max(5, Math.floor(height / GRID_SIZE));
+        }
+
+        // 調整視窗大小
+        function handleResize() {
+            calculateGrid();
+            // 限制主角不要超出新邊界
+            if (player.x >= stageCols) player.x = stageCols - 1;
+            if (player.y >= stageRows) player.y = stageRows - 1;
+            updatePlayerPosition();
+
+            // 重新排列生理用品，確保不超出畫面
+            activeItems.forEach(item => {
+                if (item.x >= stageCols || item.y >= stageRows) {
+                    const newPos = getRandomEmptyPosition();
+                    item.x = newPos.x;
+                    item.y = newPos.y;
+                }
+                const el = document.getElementById(item.id);
+                if (el) {
+                    el.style.left = (item.x * GRID_SIZE + (GRID_SIZE - 70)/2) + 'px';
+                    el.style.top = (item.y * GRID_SIZE + (GRID_SIZE - 70)/2) + 'px';
+                }
+            });
+        }
+
+        // 更新主角在畫面上的 CSS 位置
+        function updatePlayerPosition() {
+            if (!player.element) return;
+            // 居中放置在格線內
+            const left = player.x * GRID_SIZE + (GRID_SIZE - 80) / 2;
+            const top = player.y * GRID_SIZE + (GRID_SIZE - 80) / 2;
+            
+            player.element.style.left = left + 'px';
+            player.element.style.top = top + 'px';
+        }
+
+        // 生成生理用品到隨機空網格
+        function spawnItem(itemData) {
+            const pos = getRandomEmptyPosition();
+            
+            const itemElement = document.createElement('div');
+            itemElement.id = itemData.id;
+            itemElement.className = 'item';
+            
+            // 居中對齊網格
+            const left = pos.x * GRID_SIZE + (GRID_SIZE - 70) / 2;
+            const top = pos.y * GRID_SIZE + (GRID_SIZE - 70) / 2;
+            itemElement.style.left = left + 'px';
+            itemElement.style.top = top + 'px';
+
+            // 插入圖示與文字標籤
+            itemElement.innerHTML = `
+                <div class="item-icon">${itemData.svg}</div>
+                <div class="item-label">${itemData.name}</div>
+            `;
+
+            // 點擊事件：展示生理用品說明
+            itemElement.addEventListener('click', () => {
+                showIntro(itemData);
+                playChimeSound(600, 0.1); // 發出清脆小音效
+            });
+
+            document.getElementById('stage').appendChild(itemElement);
+
+            activeItems.push({
+                id: itemData.id,
+                name: itemData.name,
+                desc: itemData.desc,
+                svg: itemData.svg,
+                x: pos.x,
+                y: pos.y,
+                element: itemElement
+            });
+        }
+
+        // 獲取一個不與主角、其他生理用品重疊的隨機網格座標
+        function getRandomEmptyPosition() {
+            let pos;
+            let attempts = 0;
+            const maxAttempts = 100;
+            
+            while (attempts < maxAttempts) {
+                const rx = Math.floor(Math.random() * (stageCols - 1)) + 1; // 避開最左邊
+                const ry = Math.floor(Math.random() * (stageRows - 2)) + 1; // 避開最上最下
+                
+                // 檢查是否與主角重疊
+                if (rx === player.x && ry === player.y) {
+                    attempts++;
+                    continue;
+                }
+
+                // 檢查是否與其他生理用品重疊
+                let overlap = false;
+                for (let i = 0; i < activeItems.length; i++) {
+                    if (activeItems[i].x === rx && activeItems[i].y === ry) {
+                        overlap = true;
+                        break;
+                    }
+                }
+
+                if (!overlap) {
+                    pos = { x: rx, y: ry };
+                    break;
+                }
+                attempts++;
+            }
+
+            // 防呆機制
+            if (!pos) {
+                pos = {
+                    x: Math.floor(Math.random() * stageCols),
+                    y: Math.floor(Math.random() * stageRows)
+                };
+            }
+            return pos;
+        }
+
+        // 處理鍵盤按鍵事件
+        function handleKeyDown(e) {
+            let dx = 0;
+            let dy = 0;
+
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    dy = -1;
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    dy = 1;
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    dx = -1;
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    dx = 1;
+                    e.preventDefault();
+                    break;
+                default:
+                    return; // 其他按鍵不處理
+            }
+
+            movePlayer(dx, dy);
+        }
+
+        // 移動主角邏輯
+        function movePlayer(dx, dy) {
+            const nextX = player.x + dx;
+            const nextY = player.y + dy;
+
+            // 邊界碰撞檢查
+            if (nextX >= 0 && nextX < stageCols && nextY >= 0 && nextY < stageRows) {
+                player.x = nextX;
+                player.y = nextY;
+                updatePlayerPosition();
+                
+                // 每次移動後，檢查是否碰到任何生理用品
+                checkCollisions();
+            }
+        }
+
+        // 檢查小血滴是否碰到任何生理用品
+        function checkCollisions() {
+            activeItems.forEach((item, index) => {
+                if (player.x === item.x && player.y === item.y) {
+                    // 1. 播放「叮咚！」音效
+                    playDingDongSound();
+
+                    // 2. 增加分數
+                    score++;
+                    document.getElementById('score-val').innerText = score;
+
+                    // 3. 顯示得分飄浮特效
+                    showScoreEffect(item.x, item.y);
+
+                    // 4. 顯示生理用品的介紹知識
+                    showIntro(item);
+
+                    // 5. 讓被碰到的生理用品短暫消失，並重新出現在其他地方
+                    const el = item.element;
+                    el.style.transform = 'scale(0) rotate(180deg)';
+                    el.style.opacity = '0';
+
+                    // 重新隨機定位
+                    setTimeout(() => {
+                        const newPos = getRandomEmptyPosition();
+                        item.x = newPos.x;
+                        item.y = newPos.y;
+                        
+                        el.style.left = (item.x * GRID_SIZE + (GRID_SIZE - 70)/2) + 'px';
+                        el.style.top = (item.y * GRID_SIZE + (GRID_SIZE - 70)/2) + 'px';
+                        el.style.transform = 'scale(1) rotate(0deg)';
+                        el.style.opacity = '1';
+                    }, 400);
+                }
+            });
+        }
+
+        // 在畫面上產生得分數字動畫
+        function showScoreEffect(gridX, gridY) {
+            const effect = document.createElement('div');
+            effect.className = 'score-effect';
+            effect.innerText = '+1';
+            effect.style.left = (gridX * GRID_SIZE + GRID_SIZE/2 - 15) + 'px';
+            effect.style.top = (gridY * GRID_SIZE) + 'px';
+            
+            document.getElementById('stage').appendChild(effect);
+            
+            // 動畫結束後自動移除該 DOM 元素
+            setTimeout(() => {
+                effect.remove();
+            }, 800);
+        }
+
+        // 下方顯示用品介紹的浮板
+        let modalTimeout;
+        function showIntro(item) {
+            const modal = document.getElementById('intro-modal');
+            const title = document.getElementById('modal-title');
+            const desc = document.getElementById('modal-desc');
+            const iconContainer = document.getElementById('modal-icon-container');
+
+            title.innerText = item.name;
+            desc.innerText = item.desc;
+            iconContainer.innerHTML = item.svg;
+
+            // 彈出顯示
+            modal.style.transform = 'translateY(0)';
+            if (window.innerWidth >= 768) {
+                modal.style.transform = 'translateX(-50%) translateY(0)';
+            }
+            modal.style.opacity = '1';
+
+            // 幾秒後自動收合（如果沒有新點擊的話）
+            clearTimeout(modalTimeout);
+            modalTimeout = setTimeout(() => {
+                closeIntro();
+            }, 7500);
+        }
+
+        function closeIntro() {
+            const modal = document.getElementById('intro-modal');
+            modal.style.transform = 'translateY(128px)';
+            if (window.innerWidth >= 768) {
+                modal.style.transform = 'translateX(-50%) translateY(128px)';
+            }
+            modal.style.opacity = '0';
+        }
+
+        // --- WEB AUDIO API 擬真音效合成器 ---
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // 製作清脆的「叮咚！」雙音節音效
+        function playDingDongSound() {
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+
+                // 1. 「叮」音節 (高頻，明亮)
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'triangle';
+                osc1.frequency.setValueAtTime(880, now); // A5 鍵
+                osc1.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+                
+                gain1.gain.setValueAtTime(0.2, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+
+                // 2. 「咚」音節 (低一點)
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(587.33, now + 0.12); // D5 鍵
+                
+                gain2.gain.setValueAtTime(0, now);
+                gain2.gain.setValueAtTime(0.25, now + 0.12);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+
+                osc1.start(now);
+                osc1.stop(now + 0.3);
+                
+                osc2.start(now + 0.12);
+                osc2.stop(now + 0.5);
+                
+            } catch (error) {
+                console.log('音效播放失敗或瀏覽器不支援 Web Audio:', error);
+            }
+        }
+
+        // 一般微小回饋音效 (單音節)
+        function playChimeSound(freq, duration) {
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch (e) {}
+        }
+    </script>
+</body>
+</html>
