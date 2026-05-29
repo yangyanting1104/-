@@ -193,6 +193,15 @@
             border-color: #c2410c !important;
             color: #fef3c7 !important;
         }
+        
+        /* 午休模式下非作用中分頁按鈕配色優化 */
+        body.dark-mode .tab-inactive-dark {
+            background-color: #1e2638 !important;
+            color: #a7f3d0 !important; /* 淺翡翠綠文字 */
+        }
+        body.dark-mode .tab-inactive-dark:hover {
+            background-color: #2d364f !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col p-4 md:p-6 text-gray-700 overflow-y-auto relative">
@@ -231,11 +240,11 @@
                     </span>
                 </h2>
                 
-                <!-- 匯入方式切換按鈕 -->
+                <!-- 匯入方式切換按鈕 (已修正文字與背景同為白色的視覺問題) -->
                 <div class="flex gap-1.5 mb-2.5 text-xs font-semibold shrink-0">
-                    <button id="btn-tab-excel" onclick="switchImportTab('excel')" class="flex-1 py-1 px-2 rounded-lg bg-amber-500 text-white shadow-sm transition-all">Excel匯入</button>
+                    <button id="btn-tab-excel" onclick="switchImportTab('excel')" class="flex-1 py-1 px-2 rounded-lg bg-amber-505 text-white shadow-sm transition-all">Excel匯入</button>
                     <button id="btn-tab-text" onclick="switchImportTab('text')" class="flex-1 py-1 px-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all">手動貼上</button>
-                    <button onclick="loadDemoStudents()" class="py-1 px-2 rounded-lg bg-stone-200 text-stone-700 hover:bg-stone-300 transition-all">預設範例</button>
+                    <button onclick="loadDemoStudents()" class="py-1 px-2 rounded-lg bg-stone-200 text-stone-700 hover:bg-stone-300 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 transition-all">預設範例</button>
                 </div>
 
                 <!-- 匯入 Excel 區塊 -->
@@ -463,20 +472,36 @@
         let homeworkStatus = {}; 
 
         // 2. 切換匯入分頁 (Excel / 手動貼上)
+        // 修正點：重構此切換函數，根據日間與夜間（午休模式）自動呈現適合的按鈕前景與背景色，避免白色字配白色背景
         function switchImportTab(type) {
             const btnExcel = document.getElementById('btn-tab-excel');
             const btnText = document.getElementById('btn-tab-text');
             const areaExcel = document.getElementById('import-excel-area');
             const areaText = document.getElementById('import-text-area');
+            const isDarkMode = document.body.classList.contains('dark-mode');
 
             if (type === 'excel') {
+                // 選中 Excel 
                 btnExcel.className = "flex-1 py-1 px-2 rounded-lg bg-amber-500 text-white shadow-sm transition-all";
-                btnText.className = "flex-1 py-1 px-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all";
+                
+                if (isDarkMode) {
+                    btnText.className = "flex-1 py-1 px-2 rounded-lg tab-inactive-dark transition-all";
+                } else {
+                    btnText.className = "flex-1 py-1 px-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all";
+                }
+                
                 areaExcel.classList.remove('hidden');
                 areaText.classList.add('hidden');
             } else {
-                btnExcel.className = "flex-1 py-1 px-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all";
-                btnText.className = "flex-1 py-1 px-2 rounded-lg bg-amber-505 text-white shadow-sm transition-all";
+                // 選中手動貼上
+                btnText.className = "flex-1 py-1 px-2 rounded-lg bg-amber-500 text-white shadow-sm transition-all";
+                
+                if (isDarkMode) {
+                    btnExcel.className = "flex-1 py-1 px-2 rounded-lg tab-inactive-dark transition-all";
+                } else {
+                    btnExcel.className = "flex-1 py-1 px-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all";
+                }
+                
                 areaExcel.classList.add('hidden');
                 areaText.classList.remove('hidden');
             }
@@ -484,7 +509,7 @@
 
         // 3. 處理預設範例資料 (已將陳「雷」伊正字為陳「蕾」伊)
         function loadDemoStudents() {
-            const demoText = "1 洪叡軒\n1 何聿倫\n2 高嘉恩\n2 曾紹倫\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
+            const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
             document.getElementById('text-input').value = demoText;
             switchImportTab('text');
             generateFromText();
@@ -1411,6 +1436,10 @@
             const text = document.getElementById('theme-text');
             const isDark = body.classList.toggle('dark-mode');
             
+            // 同步更新當前選中按鈕的狀態顏色
+            const activeTab = document.getElementById('import-excel-area').classList.contains('hidden') ? 'text' : 'excel';
+            switchImportTab(activeTab);
+
             if (isDark) {
                 icon.className = "fa-solid fa-sun text-yellow-400 text-sm md:text-base animate-spin-slow";
                 text.textContent = "日間正常模式";
