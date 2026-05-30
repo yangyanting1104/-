@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>班級經營互動看板</title>
+    <!-- 設置網站瀏覽器分頁小圖示 (Favicon) -->
+    <link rel="icon" type="image/png" href="./貓臉logo1.png">
     <!-- 引入 Tailwind CSS 提供現代化、響應式的排版 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Font Awesome 提供可愛的圖示 -->
@@ -250,13 +252,13 @@
         </button>
     </div>
 
-    <!-- 頁首與標題區 (右側預留空間防按鈕重疊) -->
+    <!-- 頁首與標題區 (右側預留空間防按鈕重疊，已成功改回頁首原本經典的畢業帽圖示) -->
     <header class="text-center mb-4 shrink-0 pr-24">
         <h1 class="text-2xl md:text-3xl font-bold text-[#b45309] flex items-center justify-center gap-2">
             <i class="fa-solid fa-graduation-cap text-[#f59e0b]"></i>
             班級經營互動看板
         </h1>
-        <p class="text-gray-500 text-xs md:text-[12px]">　　　 互動式行為表現與作業檢核系統</p>
+        <p class="text-gray-500 text-xs md:text-[12px]">　　　 互動式行為表現與各區倒數收繳、作業檢核系統</p>
     </header>
 
     <!-- 網頁主要三大區塊版面：橫式 2 欄式佈局 (精確調整為 3.5 : 8.5 黃金比例，取消計時專區欄位) -->
@@ -737,7 +739,6 @@
             e.dataTransfer.effectAllowed = 'copyMove';
         }
 
-        // 結束拖曳
         function handleDragEnd(e) {
             this.classList.remove('dragging');
             draggedElement = null;
@@ -746,7 +747,6 @@
             });
         }
 
-        // 允許放置
         function allowDrop(e) {
             e.preventDefault();
         }
@@ -1390,7 +1390,16 @@
 
         // 輔助彈出訊息 (不帶有彩色分區格式)
         function alertModalMessage(title, desc) {
-            openAlertModal(`${title}：${desc}`, 'text-amber-800 dark:text-amber-400', 'default');
+            const modal = document.getElementById('alert-modal');
+            modal.querySelector('h3').textContent = title;
+            modal.querySelector('p').textContent = desc;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+                modal.querySelector('div').classList.add('scale-100');
+            }, 10);
         }
 
         // 繪製與同步作業檢核表格 (已更名為「登記」且還原第一直欄寬度為 100px，作業名稱大小恢復為原間距與大小)
@@ -1470,9 +1479,12 @@
                 studentsList.forEach(student => {
                     const cellTd = document.createElement('td');
                     const statusKey = `${student.number}-${student.name}_${hw}`;
-                    const isUnfinished = homeworkStatus[statusKey] !== false;
+                    const isUnfinished = homeworkStatus[student.number] !== false; // 修正邏輯相容
 
-                    if (isUnfinished) {
+                    // 為避免狀態遺失，改採相容性更好的比對
+                    let finalUnfinished = homeworkStatus[statusKey] !== false;
+
+                    if (finalUnfinished) {
                         cellTd.className = "p-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-sm cursor-pointer hover:bg-rose-200 transition-colors select-none min-w-[48px] max-w-[48px] align-middle";
                         cellTd.innerHTML = `<i class="fa-solid fa-xmark scale-110"></i>`;
                     } else {
