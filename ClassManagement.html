@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>班級經營互動看板</title>
     <!-- 設置網站瀏覽器分頁小圖示 (Favicon) -->
-    <link rel="icon" type="image/png" href="./貓臉logo1.png">
+    <link rel="icon" type="image/png" href="貓臉logo1.png">
     <!-- 引入 Tailwind CSS 提供現代化、響應式的排版 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Font Awesome 提供可愛的圖示 -->
@@ -244,6 +244,14 @@
 </head>
 <body class="min-h-screen flex flex-col p-4 md:p-6 text-gray-700 overflow-y-auto relative">
 
+    <!-- 左上角懸浮時間小部件 (自動抓取並轉換為 UTC+08:00) -->
+    <div class="absolute top-4 left-4 md:top-6 md:left-6 z-50">
+        <div class="glass-panel py-2 px-3.5 rounded-full shadow-md flex items-center gap-2 font-bold text-xs md:text-sm bg-white/95 select-none transition-all">
+            <i class="fa-regular fa-clock text-amber-500"></i>
+            <span id="utc-clock">載入時間中...</span>
+        </div>
+    </div>
+
     <!-- 日夜模式切換按鈕 (位於網頁最右上角，確保高曝光且不被主內容遮擋) -->
     <div class="absolute top-4 right-4 md:top-6 md:right-6 z-50">
         <button id="theme-toggle-btn" onclick="toggleTheme()" class="glass-panel py-2 px-3.5 rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-2 font-bold text-xs md:text-sm bg-white/95 hover:scale-105 active:scale-95">
@@ -252,13 +260,13 @@
         </button>
     </div>
 
-    <!-- 頁首與標題區 (右側預留空間防按鈕重疊，已成功改回頁首原本經典的畢業帽圖示) -->
-    <header class="text-center mb-4 shrink-0 pr-24">
+    <!-- 頁首與標題區 (右側、左側均預留空間防止按鈕重疊) -->
+    <header class="text-center mb-4 shrink-0 px-24">
         <h1 class="text-2xl md:text-3xl font-bold text-[#b45309] flex items-center justify-center gap-2">
             <i class="fa-solid fa-graduation-cap text-[#f59e0b]"></i>
             班級經營互動看板
         </h1>
-        <p class="text-gray-500 text-xs md:text-[12px]">　　　 互動式行為表現與各區倒數收繳、作業檢核系統</p>
+        <p class="text-gray-500 text-xs md:text-[12px]">互動式行為表現與作業檢核系統</p>
     </header>
 
     <!-- 網頁主要三大區塊版面：橫式 2 欄式佈局 (精確調整為 3.5 : 8.5 黃金比例，取消計時專區欄位) -->
@@ -739,6 +747,7 @@
             e.dataTransfer.effectAllowed = 'copyMove';
         }
 
+        // 結束拖曳
         function handleDragEnd(e) {
             this.classList.remove('dragging');
             draggedElement = null;
@@ -747,6 +756,7 @@
             });
         }
 
+        // 允許放置
         function allowDrop(e) {
             e.preventDefault();
         }
@@ -1375,15 +1385,19 @@
         // 切換作業色塊儲存格狀態 (點擊切換為勾勾或是叉叉)
         function toggleHwCell(number, name, hwName, cellElement) {
             const statusKey = `${number}-${name}_${hwName}`;
+            
+            // 讀取目前的收繳狀態（如果為 undefined，代表未完成/rose 紅底叉叉）
             const isUnfinished = homeworkStatus[statusKey] !== false; 
 
             if (isUnfinished) {
+                // 切換為已完成（綠底 check 勾勾）
                 homeworkStatus[statusKey] = false;
-                cellElement.className = "p-2.5 border-b border-r border-amber-100 bg-emerald-50 text-emerald-600 text-center font-bold text-sm cursor-pointer hover:bg-emerald-100 transition-colors select-none min-w-[48px] max-w-[48px]";
+                cellElement.className = "p-2.5 border-b border-r border-amber-100 bg-emerald-50 text-emerald-600 text-center font-bold text-sm cursor-pointer hover:bg-emerald-100 transition-colors select-none min-w-[48px] max-w-[48px] align-middle";
                 cellElement.innerHTML = `<i class="fa-solid fa-check scale-110"></i>`;
             } else {
+                // 切換回未完成（紅底 xmark 叉叉）
                 homeworkStatus[statusKey] = true;
-                cellElement.className = "p-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-sm cursor-pointer hover:bg-rose-200 transition-colors select-none min-w-[48px] max-w-[48px]";
+                cellElement.className = "p-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-sm cursor-pointer hover:bg-rose-200 transition-colors select-none min-w-[48px] max-w-[48px] align-middle";
                 cellElement.innerHTML = `<i class="fa-solid fa-xmark scale-110"></i>`;
             }
         }
@@ -1391,8 +1405,10 @@
         // 輔助彈出訊息 (不帶有彩色分區格式)
         function alertModalMessage(title, desc) {
             const modal = document.getElementById('alert-modal');
-            modal.querySelector('h3').textContent = title;
-            modal.querySelector('p').textContent = desc;
+            
+            const descEl = modal.querySelector('p');
+            descEl.textContent = `${title}：${desc}`;
+            descEl.className = "text-xl font-bold mb-6 text-amber-800 dark:text-amber-400 select-none";
 
             modal.classList.remove('hidden');
             setTimeout(() => {
@@ -1479,9 +1495,8 @@
                 studentsList.forEach(student => {
                     const cellTd = document.createElement('td');
                     const statusKey = `${student.number}-${student.name}_${hw}`;
-                    const isUnfinished = homeworkStatus[student.number] !== false; // 修正邏輯相容
-
-                    // 為避免狀態遺失，改採相容性更好的比對
+                    
+                    // 為了避免狀態遺失，改採相容性更好的比對
                     let finalUnfinished = homeworkStatus[statusKey] !== false;
 
                     if (finalUnfinished) {
@@ -1531,6 +1546,33 @@
             }
         }
 
+        // ==========================================
+        // 【新增功能】UTC+08:00 台北標準時即時數位時鐘更新邏輯
+        // ==========================================
+        function updateUTClock() {
+            const clockEl = document.getElementById('utc-clock');
+            if (!clockEl) return;
+
+            const now = new Date();
+            // 獲取當前設備的 UTC 毫秒數，並加上 8 小時偏移以確保鎖定 UTC+08:00
+            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const taipeiTime = new Date(utcTime + (3600000 * 8));
+
+            const year = taipeiTime.getFullYear();
+            const month = String(taipeiTime.getMonth() + 1).padStart(2, '0');
+            const date = String(taipeiTime.getDate()).padStart(2, '0');
+            const hours = String(taipeiTime.getHours()).padStart(2, '0');
+            const minutes = String(taipeiTime.getMinutes()).padStart(2, '0');
+            const seconds = String(taipeiTime.getSeconds()).padStart(2, '0');
+            
+            // 星期數轉換為繁體中文對照
+            const daysArr = ["日", "一", "二", "三", "四", "五", "六"];
+            const dayOfWeek = daysArr[taipeiTime.getDay()];
+
+            // 拼裝出完整的年月日(星期)與時:分:秒
+            clockEl.textContent = `${year}年${month}月${date}日 (週${dayOfWeek}) ${hours}:${minutes}:${seconds}`;
+        }
+
         // 15. 初始化頁面載入與預設配置
         window.onload = function() {
             // 載入預設學生
@@ -1540,6 +1582,10 @@
             applyZoneTime('good');
             applyZoneTime('bad');
             applyZoneTime('toilet');
+
+            // 啟動並設定每秒更新的 UTC+08:00 即時時鐘
+            updateUTClock();
+            setInterval(updateUTClock, 1000);
         }
     </script>
 </body>
