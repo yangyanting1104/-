@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>班級經營互動看板</title>
     <!-- 設置網站瀏覽器分頁小圖示 (Favicon) -->
-    <link rel="icon" type="image/png" href="./貓臉logo1.png">
+    <link class="favicon" rel="icon" type="image/png" href="./貓臉logo1.png">
     <!-- 引入 Tailwind CSS 提供現代化、響應式的排版 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Font Awesome 提供可愛的圖示 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 引入 Google Fonts 採用圓潤可愛的字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- 引入 SheetJS 用於解析 Excel 檔案 (.xlsx / .xls) -->
+    <!-- 引入 SheetJS 用宇解析 Excel 檔案 (.xlsx / .xls) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -33,11 +33,28 @@
             opacity: 0.5;
             transform: scale(1.05);
         }
-        /* 讓拖曳目標區域在有東西懸停時產生動態邊框效果 */
+        /* 讓拖曳目標區域在有東西懸停時產生動態邊框效果 (日間模式) */
         .drag-hover {
             border-color: #f59e0b !important;
             background-color: #fef3c7 !important;
         }
+        
+        /* ==========================================
+           【關鍵修改】午休夜間模式下，名牌懸停於各表現區時的反白樣式 (極低亮度、輕透粉彩微光，完全不刺眼)
+           ========================================== */
+        body.dark-mode .good-zone-hover {
+            border-color: #10b981 !important;
+            background-color: rgba(16, 185, 129, 0.08) !important;
+        }
+        body.dark-mode .bad-zone-hover {
+            border-color: #fb7185 !important;
+            background-color: rgba(244, 63, 94, 0.08) !important;
+        }
+        body.dark-mode .toilet-zone-hover {
+            border-color: #38bdf8 !important;
+            background-color: rgba(14, 165, 233, 0.08) !important;
+        }
+
         /* 滾動條美化 */
         ::-webkit-scrollbar {
             width: 8px;
@@ -215,21 +232,30 @@
             color: #38bdf8 !important;
         }
 
-        /* 午休模式下的重疊徽章（星星與閃電與水滴）調暗優化 */
+        /* ==========================================
+           【關鍵修改】優化夜間模式下星星、閃電與水滴累計次數徽章的色調 
+           大幅提升飽和度、清晰度與夜視辨識度，且保證護眼不刺眼
+           ========================================== */
         body.dark-mode .star-badge {
-            background-color: #b45309 !important; /* 暗金黃色 */
-            border-color: #d97706 !important;
-            color: #fef3c7 !important;
+            background-color: #d97706 !important; /* 溫暖的琥珀亮金黃色底 */
+            border-color: #f59e0b !important;
+            color: #fffbeb !important; /* 高對比淺色文字 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
         }
         body.dark-mode .lightning-badge {
-            background-color: #9a3412 !important; /* 暗橘紅色 */
-            border-color: #c2410c !important;
-            color: #fef3c7 !important;
+            background-color: #ea580c !important; /* 醒目柔和的粉亮珊瑚橘紅色底 */
+            border-color: #f97316 !important;
+            color: #fff7ed !important; /* 高對比淺色文字 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
         }
         body.dark-mode .toilet-badge {
-            background-color: #0369a1 !important; /* 暗水藍色 */
-            border-color: #0284c7 !important;
-            color: #e0f2fe !important;
+            background-color: #0284c7 !important; /* 安靜剔透的月光湖水藍色底 */
+            border-color: #0ea5e9 !important;
+            color: #f0f9ff !important; /* 高對比淺色文字 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
         }
         
         /* 午休模式下非作用中分頁按鈕配色優化 */
@@ -393,17 +419,13 @@
                         <!-- 專區下方獨立計時器 (預設4分鐘) -->
                         <div class="border-t border-rose-100/70 pt-2.5 mt-2 shrink-0 bg-white/40 dark:bg-slate-900/20 p-2 rounded-xl">
                             <div class="flex items-center justify-center gap-1 text-[10px] mb-1.5 font-medium">
-                                <span class="text-rose-800 dark:text-rose-300">設定：</span>
+                                <span class="text-rose-800 dark:text-rose-300">設定::</span>
                                 <input type="number" id="input-mins-bad" value="4" min="0" max="99" class="w-8 text-center border border-rose-200 rounded p-0.5 text-rose-900 focus:outline-none focus:ring-1 focus:ring-rose-400">
                                 <span class="text-rose-700">分</span>
                                 <input type="number" id="input-secs-bad" value="0" min="0" max="59" class="w-8 text-center border border-rose-200 rounded p-0.5 text-rose-900 focus:outline-none focus:ring-1 focus:ring-rose-400">
                                 <span class="text-rose-700">秒</span>
                                 <button onclick="applyZoneTime('bad')" class="ml-1 bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-200 px-1.5 py-0.5 rounded text-[9px] font-extrabold hover:bg-rose-200 transition-all">套用</button>
                             </div>
-                            <!-- 
-                              此處在日間模式下保留原本正確好看的 bg-rose-50/50 (日間) 與 border-rose-100/70，
-                              同時與 CSS 中 dark-mode 的 bg-rose-100 進行極佳的降亮呼應！
-                            -->
                             <div class="flex items-center justify-between bg-rose-50/50 dark:bg-rose-950/15 px-2.5 py-1.5 rounded-xl border border-rose-100/70">
                                 <div id="timer-display-bad" class="text-lg md:text-xl font-black text-rose-700 dark:text-rose-400 font-mono tracking-wider">04:00</div>
                                 <div class="flex gap-1">
@@ -526,13 +548,14 @@
             <!-- 已移除原本棕色字體的「時間到！」h3 標籤，讓畫面最極簡、大器 -->
             <!-- 給予一個 ID 方便動態改變顏色與文字 -->
             <p id="alert-modal-desc" class="text-gray-600 mb-6 font-medium">叮咚～時間到！</p>
+            <p id="alert-modal-details" class="text-gray-500 text-sm mt-2"></p>
             <button onclick="closeAlertModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all text-lg focus:ring-4 focus:ring-amber-200">
                 確認
             </button>
         </div>
     </div>
 
-    <!-- 🎉 【新功能】恭喜作業全數完成慶祝特效 Overlay (BINGO!) 🎉 -->
+    <!-- 🎉 【BINGO慶祝特效】恭喜作業全數完成慶祝特效 Overlay (BINGO!) 🎉 -->
     <div id="celebration-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center hidden opacity-0 transition-opacity duration-500">
         <div class="relative text-center transform scale-90 transition-transform duration-500 max-w-sm w-full mx-4 p-8 bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-400 rounded-3xl shadow-2xl border-4 border-white text-white">
             <!-- 裝飾煙火/五彩紙屑 Canvas 畫布 -->
@@ -549,7 +572,7 @@
                 </div>
                 <h2 class="text-2xl font-black mb-1 tracking-wide text-white drop-shadow-md">作業全數完成！</h2>
                 <p id="celebration-student-info" class="text-xl font-extrabold mb-5 text-yellow-100 drop-shadow-sm">01號 王小明</p>
-                <button onclick="closeCelebration()" class="w-full bg-white hover:bg-yellow-100 text-orange-600 font-bold py-2.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all text-base focus:ring-4 focus:ring-yellow-300 active:scale-95">
+                <button onclick="closeCelebration()" class="w-full bg-white hover:bg-yellow-100 text-orange-600 font-bold py-2.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all text-base focus:ring-4 focus:ring-yellow-300 active:scale-95">
                     超級棒！
                 </button>
             </div>
@@ -586,7 +609,7 @@
         let confettiParticles = [];
         const confettiColors = ['#f43f5e', '#10b981', '#06b6d4', '#f59e0b', '#ec4899', '#3b82f6', '#ffffff', '#eab308'];
 
-        // 2. 依座號排序指定表現區域內的所有學生卡片 (宣告至頂層，徹底根除未定義報錯問題)
+        // 2. 依座號排序指定表現區域內的所有學生卡片 (宣告至頂層，徹底根除未定義報報問題)
         function sortZoneCards(zone) {
             const cards = Array.from(zone.querySelectorAll('.student-card'));
             cards.sort((a, b) => {
@@ -632,9 +655,83 @@
             }
         }
 
+        // ==========================================
+        // 【錯誤修正關鍵】將拖放事件相關處理函數提升（Hoist）宣告，確保 createStudentCard 初始化綁定時不會拋出 ReferenceError
+        // ==========================================
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', this.id);
+            e.dataTransfer.effectAllowed = 'copyMove';
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedElement = null;
+            document.querySelectorAll('.drag-zone').forEach(zone => {
+                zone.classList.remove('drag-hover');
+                zone.classList.remove('good-zone-hover');
+                zone.classList.remove('bad-zone-hover');
+                zone.classList.remove('toilet-zone-hover');
+            });
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        // 修改：動態判斷並接聽拖曳事件
+        // 在夜間模式下，當拖曳名牌卡片懸停於指定區域上方時，會自動套用低亮度、舒適不傷眼的反白微光特效！
+        function dragEnter(e) {
+            e.preventDefault();
+            const zone = e.currentTarget;
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            
+            if (isDarkMode) {
+                if (zone.id === 'good-zone') {
+                    zone.classList.add('good-zone-hover');
+                } else if (zone.id === 'bad-zone') {
+                    zone.classList.add('bad-zone-hover');
+                } else if (zone.id === 'toilet-zone') {
+                    zone.classList.add('toilet-zone-hover');
+                }
+            } else {
+                zone.classList.add('drag-hover');
+            }
+        }
+
+        function dragLeave(e) {
+            const zone = e.currentTarget;
+            zone.classList.remove('drag-hover');
+            zone.classList.remove('good-zone-hover');
+            zone.classList.remove('bad-zone-hover');
+            zone.classList.remove('toilet-zone-hover');
+        }
+
+        function handleDrop(e, zoneType) {
+            e.preventDefault();
+            const zone = e.currentTarget;
+            zone.classList.remove('drag-hover');
+            zone.classList.remove('good-zone-hover');
+            zone.classList.remove('bad-zone-hover');
+            zone.classList.remove('toilet-zone-hover');
+
+            const id = e.dataTransfer.getData('text/plain');
+            const sourceCard = document.getElementById(id);
+
+            if (!sourceCard) return;
+
+            const number = sourceCard.getAttribute('data-number');
+            const name = sourceCard.getAttribute('data-name');
+
+            addStudentToZone(number, name, zoneType, sourceCard);
+        }
+
         // 4. 處理預設範例資料
         function loadDemoStudents() {
-            const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
+            const demoText = "1 洪叡軒\n1 何聿倫\n2 高嘉恩\n2 曾紹倫\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
             document.getElementById('text-input').value = demoText;
             switchImportTab('text');
             generateFromText();
@@ -736,6 +833,7 @@
         }
 
         // 8. 創建單一學生方塊 DOM 元素 (置中對齊：座號和姓名在名牌內部水平/垂直置中)
+        // 修改：移除 group-hover 導致的座號淡出與姓名 px 內距推移效果，確保在學生姓名區時座號與姓名完全靜止不變！
         function createStudentCard(number, name) {
             totalCreatedCount++;
             const uniqueId = `student-${totalCreatedCount}`;
@@ -743,7 +841,7 @@
             const card = document.createElement('div');
             card.id = uniqueId;
             // 預備區方塊：字體與座號一同並列，並加入 justify-center 來完全置中，加上 rounded-xl 保持圓角
-            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-grab active:cursor-grabbing select-none transition-all text-xs font-semibold relative";
+            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-grab active:cursor-grabbing select-none transition-all text-xs font-semibold relative group";
             card.setAttribute('draggable', 'true');
             card.setAttribute('data-number', number);
             card.setAttribute('data-name', name);
@@ -752,12 +850,26 @@
             const isEven = parseInt(number) % 2 === 0;
             const bgClass = isEven ? 'bg-amber-50 text-amber-800' : 'bg-orange-50 text-orange-800';
             
-            // 座號圓圈在 Flex 內部流，與姓名並列一同置中
+            // 座號圓圈在 Flex 內部流，與姓名並列一同置中。
+            // 修正：已移除 `group-hover:opacity-0` 與 `group-hover:px-4`，讓圓圈與姓名保持 100% 靜態不閃爍。
             card.innerHTML = `
-                <span class="w-5 h-5 flex items-center justify-center rounded-full text-[9px] font-bold ${bgClass} shrink-0 shadow-sm">
+                <!-- 左側快速分發：笑臉 -->
+                <button class="quick-btn-left absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all text-emerald-500 hover:text-emerald-700 cursor-pointer z-20 p-1" title="一鍵加入好表現區">
+                    <i class="fa-regular fa-face-laugh-beam text-sm"></i>
+                </button>
+                
+                <span class="w-5 h-5 flex items-center justify-center rounded-full text-[9px] font-bold ${bgClass} shrink-0 shadow-sm transition-all">
                     ${number}
                 </span>
-                <span class="truncate text-amber-950 font-bold">${name}</span>
+                
+                <span class="truncate text-amber-950 font-bold px-1 transition-all">
+                    ${name}
+                </span>
+                
+                <!-- 右側快速分發：哭臉 -->
+                <button class="quick-btn-right absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all text-rose-500 hover:text-rose-700 cursor-pointer z-20 p-1" title="一鍵加入待改進區">
+                    <i class="fa-regular fa-face-sad-tear text-sm"></i>
+                </button>
             `;
 
             card.addEventListener('dragstart', handleDragStart);
@@ -765,117 +877,28 @@
 
             setupTouchDrag(card);
 
+            // 綁定快速按鈕的點擊事件
+            const leftBtn = card.querySelector('.quick-btn-left');
+            const rightBtn = card.querySelector('.quick-btn-right');
+
+            leftBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // 阻止拖曳或點擊擴散
+                addStudentToZone(number, name, 'good', card);
+            });
+
+            rightBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // 阻止拖曳或點擊擴散
+                addStudentToZone(number, name, 'bad', card);
+            });
+
             return card;
         }
 
-        // 9. 拖曳與放置邏輯 (HTML5 Drag and Drop)
-        let draggedElement = null;
-
-        function handleDragStart(e) {
-            draggedElement = this;
-            this.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', this.id);
-            e.dataTransfer.effectAllowed = 'copyMove';
-        }
-
-        // 結束拖曳
-        function handleDragEnd(e) {
-            this.classList.remove('dragging');
-            draggedElement = null;
-            document.querySelectorAll('.drag-zone').forEach(zone => {
-                zone.classList.remove('drag-hover');
-            });
-        }
-
-        // 允許放置
-        function allowDrop(e) {
-            e.preventDefault();
-        }
-
-        function dragEnter(e) {
-            e.preventDefault();
-            const zone = e.currentTarget;
-            zone.classList.add('drag-hover');
-        }
-
-        // 移除拖曳懸停效果
-        function dragLeave(e) {
-            const zone = e.currentTarget;
-            zone.classList.remove('drag-hover');
-        }
-
-        function handleDrop(e, zoneType) {
-            e.preventDefault();
-            const zone = e.currentTarget;
-            zone.classList.remove('drag-hover');
-
-            const id = e.dataTransfer.getData('text/plain');
-            const sourceCard = document.getElementById(id);
-
-            if (!sourceCard) return;
-
-            const number = sourceCard.getAttribute('data-number');
-            const name = sourceCard.getAttribute('data-name');
-
-            addStudentToZone(number, name, zoneType, sourceCard);
-        }
-
-        // 當學生方塊被拖移至表現記錄區時，整體放大：寬度 w-40 (160px)、高度 h-12 (48px)，名字升級為 text-base md:text-lg，座號圓圈放大至 w-7 h-7、座號數字放大為 text-sm
-        // 同時在此完全還原並保留「座號與姓名手牽手並排置中」的完美置中，並保留 rounded-xl 圓角設定！
-        function moveCardToZone(card, zone) {
-            const placeholder = zone.querySelector('.placeholder');
-            if (placeholder) {
-                placeholder.style.display = 'none';
-            }
-            
-            // 先清理原來的緊密微型樣式
-            card.classList.remove('py-2', 'px-2.5', 'text-xs', 'justify-center');
-            
-            // 表現區置中對齊樣式設定，使用 flex 水平垂直絕對置中，並附加 group 實現懸浮效果，加上 rounded-xl 保持圓角
-            // 尺寸改為：寬度 w-40 (160px), 高度 h-12 (48px), 字型大小為 text-base md:text-lg 
-            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-3 text-base md:text-lg rounded-xl shadow-sm w-40 h-12 shrink-0 mx-auto flex items-center justify-center gap-2.5 group relative transition-all duration-300";
-
-            // 座號與姓名自然排列
-            // 座號圓圈放大至 w-7 h-7，字型大小變為 text-sm font-black
-            const numSpan = card.querySelector('span:first-child');
-            if (numSpan) {
-                numSpan.className = numSpan.className.replace(/\b(absolute|left-[0-9.]+)\b/g, '').trim();
-                numSpan.classList.remove('w-5', 'h-5', 'text-[9px]');
-                numSpan.classList.add('w-7', 'h-7', 'text-sm', 'font-black', 'shrink-0');
-            }
-
-            const nameSpan = card.querySelector('span:nth-child(2)');
-            if (nameSpan) {
-                nameSpan.className = nameSpan.className.replace(/\b(px-[0-9.]+|w-full)\b/g, '').trim();
-                nameSpan.classList.remove('font-extrabold', 'text-center');
-                nameSpan.classList.add('font-bold', 'truncate');
-            }
-
-            if (!card.querySelector('.delete-btn')) {
-                const deleteBtn = document.createElement('button');
-                // 刪除按鈕配合名牌微調定位與大小，精確固定在 absolute right-2.5，滑鼠移入時才浮現
-                deleteBtn.className = "delete-btn text-red-400 hover:text-red-600 focus:outline-none transition-all absolute right-2.5 bg-white/90 pl-1 rounded opacity-0 group-hover:opacity-100 z-20 h-7 flex items-center";
-                deleteBtn.innerHTML = `<i class="fa-regular fa-trash-can text-sm"></i>`;
-                
-                deleteBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    const parent = card.parentElement;
-                    const zoneId = parent ? parent.id.split('-')[0] : '';
-                    
-                    if (zoneId) {
-                        removeSingleCardCount(card, zoneId);
-                    } else {
-                        card.remove();
-                    }
-                };
-                card.appendChild(deleteBtn);
-            }
-
-            zone.appendChild(card);
-            sortZoneCards(zone);
-        }
-
-        // 清除單一卡片的登記計次與重疊標章
+        // ==========================================
+        // 【錯誤修正關鍵】補回並提升 `removeSingleCardCount` 的定義，徹底修正點擊垃圾桶時 taibeiTime 未定義或點擊崩潰
+        // ==========================================
         function removeSingleCardCount(card, zoneId) {
             let count = parseInt(card.getAttribute('data-count') || 1);
             if (count > 1) {
@@ -900,6 +923,71 @@
                 }
             }
             updateCounts();
+        }
+
+        // 10. 當學生方塊被拖移至表現記錄區時，整體放大：寬度 w-40 (160px)、高度 h-12 (48px)，名字升級為 text-base md:text-lg，座號圓圈放大至 w-7 h-7、座號數字放大為 text-sm
+        // 同時在此完全還原並保留「座號與姓名手牽手並排置中」的完美置中，並保留 rounded-xl 圓角設定！
+        function moveCardToZone(card, zone) {
+            const placeholder = zone.querySelector('.placeholder');
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            
+            // 先清理原來的緊密微型樣式
+            card.classList.remove('py-2', 'px-2.5', 'text-xs', 'justify-center');
+            
+            // 表現區置中對齊樣式設定，使用 flex 水平垂直絕對置中，並附加 group 實現懸浮效果，加上 rounded-xl 保持圓角
+            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-3 text-base md:text-lg rounded-xl shadow-sm w-40 h-12 shrink-0 mx-auto flex items-center justify-center gap-2.5 group relative transition-all duration-300";
+
+            // 關鍵修改：進入表現記錄區後，不可再被拖曳（不論是 HTML5 還是觸控）
+            card.setAttribute('draggable', 'false');
+            card.classList.remove('cursor-grab', 'active:cursor-grabbing');
+            card.classList.add('cursor-default');
+
+            // 移除快速按鈕 (若有) 避免右側欄出現重複的笑臉與哭臉快速分發鍵
+            const leftBtn = card.querySelector('.quick-btn-left'); if (leftBtn) leftBtn.remove();
+            const rightBtn = card.querySelector('.quick-btn-right'); if (rightBtn) rightBtn.remove();
+
+            // 座號與姓名自然排列
+            // 座號圓圈放大至 w-7 h-7，字型大小變為 text-sm font-black
+            const numSpan = card.querySelector('span:first-child');
+            if (numSpan) {
+                numSpan.className = numSpan.className.replace(/\b(absolute|left-[0-9.]+)\b/g, '').trim();
+                numSpan.classList.remove('w-5', 'h-5', 'text-[9px]');
+                numSpan.classList.add('w-7', 'h-7', 'text-sm', 'font-black', 'shrink-0');
+            }
+
+            const nameSpan = card.querySelector('span:nth-child(2)');
+            if (nameSpan) {
+                nameSpan.className = nameSpan.className.replace(/\b(px-[0-9.]+|w-full)\b/g, '').trim();
+                nameSpan.classList.remove('font-extrabold', 'text-center');
+                nameSpan.classList.add('font-bold', 'truncate');
+            }
+
+            if (!card.querySelector('.delete-btn')) {
+                const deleteBtn = document.createElement('button');
+                // 刪除按鈕配合名牌微調定位與大小，精確固定在 absolute right-2.5，滑鼠移入時才浮現
+                // 使用 addEventListener 處理，並拉高層級 z-50 與 pointer-events-auto 徹底防止遮擋與無反應
+                deleteBtn.className = "delete-btn text-red-400 hover:text-red-600 focus:outline-none transition-all absolute right-2.5 bg-white/90 pl-1 rounded opacity-0 group-hover:opacity-100 z-50 h-7 w-7 flex items-center justify-center pointer-events-auto";
+                deleteBtn.innerHTML = `<i class="fa-regular fa-trash-can text-sm"></i>`;
+                
+                deleteBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const parent = card.parentElement;
+                    const zoneId = parent ? parent.id.split('-')[0] : '';
+                    
+                    if (zoneId) {
+                        removeSingleCardCount(card, zoneId);
+                    } else {
+                        card.remove();
+                    }
+                });
+                card.appendChild(deleteBtn);
+            }
+
+            zone.appendChild(card);
+            sortZoneCards(zone);
         }
 
         // 11. 分發與新增學生至指定放置區
@@ -1039,6 +1127,8 @@
             let ghostNode = null;
 
             card.addEventListener('touchstart', function(e) {
+                // 關鍵修改：如果已經被設為不可拖曳，則直接 return 退出觸控拖動
+                if (card.getAttribute('draggable') === 'false') return;
                 if (e.target.closest('.delete-btn')) return;
                 
                 activeTouch = true;
@@ -1077,7 +1167,7 @@
                     zone.classList.remove('dark-hover');
                 });
                 if (targetZone) {
-                    targetZone.classList.add('drag-hover');
+                    targetZone.classList.add('dark-hover');
                 }
             }, { passive: true });
 
@@ -1216,15 +1306,15 @@
             clearInterval(timers[zone].interval);
             
             const btn = document.getElementById(`btn-toggle-${zone}`);
-            const icon = document.getElementById(`icon-toggle-${zone}`);
-            const text = document.getElementById(`text-toggle-${zone}`);
+            const icon = document.getElementById('icon-toggle-' + zone);
+            const text = document.getElementById('text-toggle-' + zone);
             
-            btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+            if (btn) btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
             
             const defaultColor = zone === 'good' ? 'bg-emerald-500 hover:bg-emerald-600' : (zone === 'bad' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-sky-500 hover:bg-sky-600');
-            btn.classList.add(...defaultColor.split(' '));
-            icon.className = "fa-solid fa-play";
-            text.textContent = "開始";
+            if (btn) btn.classList.add(...defaultColor.split(' '));
+            if (icon) icon.className = "fa-solid fa-play";
+            if (text) text.textContent = "開始";
         }
 
         // 重設為原始設定時間
@@ -1367,7 +1457,7 @@
             const canvas = document.getElementById('celebration-canvas');
             const ctx = canvas.getContext('2d');
             
-            // 動態同步畫布與外部容器大小
+            // 勁態同步畫布與外部容器大小
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = canvas.parentElement.offsetHeight;
             
@@ -1602,7 +1692,7 @@
             }
         }
 
-        // 輔助彈出訊息 (不帶有彩色分區格式)
+        // 包裝彈出警示訊息 (不帶有彩色分區格式)
         function alertModalMessage(title, desc) {
             const modal = document.getElementById('alert-modal');
             
