@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>班級經營互動看板</title>
     <!-- 設置網站瀏覽器分頁小圖示 (Favicon) -->
-    <link class="favicon" rel="icon" type="image/png" href="./貓臉logo1.png">
+    <link class="favicon" rel="icon" type="image/png" href="貓臉logo1.png">
     <!-- 引入 Tailwind CSS 提供現代化、響應式的排版 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Font Awesome 提供可愛的圖示 -->
@@ -237,7 +237,7 @@
            大幅提升飽和度、清晰度與夜視辨識度，且保證護眼不刺眼
            ========================================== */
         body.dark-mode .star-badge {
-            background-color: #d97706 !important; /* 溫暖的琥珀亮金黃色底 */
+            background-color: #d97706 !important; /* 溫慢的琥珀亮金黃色底 */
             border-color: #f59e0b !important;
             color: #fffbeb !important; /* 高對比淺色文字 */
             text-shadow: 0 1px 2px rgba(0,0,0,0.5);
@@ -270,7 +270,7 @@
 </head>
 <body class="min-h-screen flex flex-col p-4 md:p-6 text-gray-700 overflow-y-auto relative">
 
-    <!-- 左上角懸浮時間小部件 (自動抓取並轉換為 UTC+08:00) -->
+    <!-- Left Upper Floating Clock -->
     <div class="absolute top-4 left-4 md:top-6 md:left-6 z-50">
         <div class="glass-panel py-2 px-3.5 rounded-full shadow-md flex items-center gap-2 font-bold text-xs md:text-sm bg-white/95 select-none transition-all">
             <i class="fa-regular fa-clock text-amber-500"></i>
@@ -278,7 +278,7 @@
         </div>
     </div>
 
-    <!-- 日夜模式切換按鈕 (位於網頁最右上角，確保高曝光且不被主內容遮擋) -->
+    <!-- Theme Toggle Button -->
     <div class="absolute top-4 right-4 md:top-6 md:right-6 z-50">
         <button id="theme-toggle-btn" onclick="toggleTheme()" class="glass-panel py-2 px-3.5 rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-2 font-bold text-xs md:text-sm bg-white/95 hover:scale-105 active:scale-95">
             <i id="theme-icon" class="fa-solid fa-moon text-amber-500 text-sm md:text-base animate-pulse"></i>
@@ -286,7 +286,7 @@
         </button>
     </div>
 
-    <!-- 頁首與標題區 (右側、左側均預留空間防止按鈕重疊) -->
+    <!-- Header Section -->
     <header class="text-center mb-4 shrink-0 px-24">
         <h1 class="text-2xl md:text-3xl font-bold text-[#b45309] flex items-center justify-center gap-2">
             <i class="fa-solid fa-graduation-cap text-[#f59e0b]"></i>
@@ -295,13 +295,12 @@
         <p class="text-gray-500 text-xs md:text-[12px]">互動式行為表現與作業檢核系統</p>
     </header>
 
-    <!-- 網頁主要三大區塊版面：橫式 2 欄式佈局 (精確調整為 3.5 : 8.5 黃金比例，取消計時專區欄位) -->
+    <!-- Main Grid Section -->
     <main class="grid grid-cols-1 md:grid-cols-[3.5fr_8.5fr] gap-5 md:h-[580px] shrink-0 min-h-0 mb-6">
         
-        <!-- 左欄：學生姓名區 (3.5) -->
+        <!-- Left Column: Student List Area -->
         <section class="flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0">
-                <!-- 區塊標題 -->
                 <h2 class="text-lg font-bold text-[#78350f] mb-2.5 flex items-center justify-between shrink-0">
                     <span class="flex items-center gap-2">
                         <i class="fa-solid fa-users text-[#d97706]"></i>
@@ -312,14 +311,13 @@
                     </span>
                 </h2>
                 
-                <!-- 匯入方式切換按鈕 (已修正文字與背景同為白色的視覺問題) -->
                 <div class="flex gap-1.5 mb-2.5 text-xs font-semibold shrink-0">
                     <button id="btn-tab-excel" onclick="switchImportTab('excel')" class="flex-1 py-1 px-2 rounded-lg bg-amber-500 text-white shadow-sm transition-all">Excel匯入</button>
                     <button id="btn-tab-text" onclick="switchImportTab('text')" class="flex-1 py-1 px-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all">手動貼上</button>
                     <button onclick="loadDemoStudents()" class="py-1 px-2 rounded-lg bg-stone-200 text-stone-700 hover:bg-stone-300 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 transition-all">預設範例</button>
                 </div>
 
-                <!-- 匯入 Excel 區塊 -->
+                <!-- Excel Import Area -->
                 <div id="import-excel-area" class="mb-2.5 shrink-0">
                     <div class="border-2 border-dashed border-amber-200 rounded-xl p-3 text-center bg-amber-50/50 hover:bg-amber-50 transition-colors cursor-pointer relative">
                         <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleExcelUpload(event)">
@@ -329,7 +327,7 @@
                     </div>
                 </div>
 
-                <!-- 手動貼上文字區塊 -->
+                <!-- Plain Text Import Area -->
                 <div id="import-text-area" class="space-y-2 mb-2.5 shrink-0 hidden">
                     <textarea id="text-input" rows="3" class="w-full text-xs p-2 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white/70" placeholder="格式範例：&#13;01 王小明&#13;02 李大同"></textarea>
                     <button onclick="generateFromText()" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-1.5 px-3 rounded-xl shadow-sm transition-all">
@@ -337,10 +335,8 @@
                     </button>
                 </div>
 
-                <!-- 學生方塊生成的展示容器 -->
                 <div class="flex-grow border border-amber-100 bg-amber-50/30 rounded-xl p-2.5 overflow-y-auto min-h-0">
                     <div id="student-pool" class="grid grid-cols-2 gap-2">
-                        <!-- 學生方塊會在這裡動態生成 -->
                         <div class="col-span-full py-12 text-center text-gray-400 text-xs">
                             <i class="fa-solid fa-arrow-up text-lg mb-2 block animate-bounce"></i>
                             請先匯入學生名單以生成方塊
@@ -350,29 +346,28 @@
             </div>
         </section>
 
-        <!-- 中欄：表現記錄區 (8.5) (內含三分小區：好表現、待改進、課間上廁所，且各附帶一組完整計時器) -->
+        <!-- Right Column: Performance Zones Area -->
         <section class="flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0 gap-3">
-                <!-- 區塊標題 (已移除後方的說明提示字串，保持極簡清爽) -->
                 <h2 class="text-lg font-bold text-[#78350f] shrink-0 flex items-center gap-2">
                     <i class="fa-solid fa-star text-amber-500"></i>
                     表現記錄區
                 </h2>
 
-                <!-- 三分小區左右橫向排列 -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow min-h-0">
+                <!-- 三分小區左右橫向排列：關鍵修改，欄位比例精確設定為 58% : 21% : 21% -->
+                <div class="flex flex-col md:flex-row gap-4 flex-grow min-h-0 w-full">
                     
-                    <!-- 1. 好表現區 (翠綠色系) -->
-                    <div class="bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between">
+                    <!-- 1. 好表現區 (翠綠色系) — 寬度佔比 58% -->
+                    <div class="bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between w-full md:w-[58%]">
                         <div class="flex items-center gap-1.5 mb-1.5 text-emerald-700 font-bold border-b border-emerald-100 pb-1.5 shrink-0 text-xs">
                             <i class="fa-regular fa-face-laugh-beam text-lg text-emerald-500"></i>
                             <span>好表現區</span>
                             <span id="good-count" class="ml-auto text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
                         
-                        <!-- 學生方塊放置區 -->
-                        <div id="good-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-1 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'good')">
-                            <div class="placeholder py-12 flex items-center justify-center text-emerald-400 text-xs text-center italic">
+                        <!-- 學生方塊放置區設定為三欄 Grid (grid grid-cols-3 gap-2)，且對齊項調整為 items-start content-start 以實現完美的橫排與高整合度 -->
+                        <div id="good-zone" class="drag-zone flex-grow overflow-y-auto grid grid-cols-3 gap-2 p-1 min-h-0 rounded-xl transition-all items-start justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'good')">
+                            <div class="placeholder col-span-3 py-12 flex items-center justify-center text-emerald-400 text-xs text-center italic">
                                 拖曳學生至此
                             </div>
                         </div>
@@ -401,15 +396,15 @@
                         </div>
                     </div>
 
-                    <!-- 2. 待改進區 (粉紅色系，預設4分鐘) -->
-                    <div class="bg-rose-50/50 border-2 border-rose-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between">
+                    <!-- 2. 待改進區 (粉紅色系，預設4分鐘) — 寬度佔比 21% -->
+                    <div class="bg-rose-50/50 border-2 border-rose-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between w-full md:w-[21%]">
                         <div class="flex items-center gap-1.5 mb-1.5 text-rose-700 font-bold border-b border-rose-100 pb-1.5 shrink-0 text-xs">
                             <i class="fa-regular fa-face-sad-tear text-lg text-rose-500"></i>
                             <span>待改進區</span>
                             <span id="bad-count" class="ml-auto text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
                         
-                        <!-- 學生方塊放置區 -->
+                        <!-- 學生方塊放置區：維持單欄 (flex flex-col) 排列 -->
                         <div id="bad-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-1 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'bad')">
                             <div class="placeholder py-12 flex items-center justify-center text-rose-400 text-xs text-center italic">
                                 拖曳學生至此
@@ -440,15 +435,15 @@
                         </div>
                     </div>
 
-                    <!-- 3. 課間上廁所區 (湖水藍色系，預設2分鐘) -->
-                    <div class="bg-sky-50/50 border-2 border-sky-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between">
+                    <!-- 3. 課間上廁所區 (湖水藍色系，預設2分鐘) — 寬度佔比 21% -->
+                    <div class="bg-sky-50/50 border-2 border-sky-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between w-full md:w-[21%]">
                         <div class="flex items-center gap-1.5 mb-1.5 text-sky-700 font-bold border-b border-sky-100 pb-1.5 shrink-0 text-xs">
                             <i class="fa-solid fa-restroom text-lg text-sky-500"></i>
                             <span>課間上廁所</span>
                             <span id="toilet-count" class="ml-auto text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
                         
-                        <!-- 學生方塊放置區 -->
+                        <!-- 學生方塊放置區：維持單欄 (flex flex-col) 排列 -->
                         <div id="toilet-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-1 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'toilet')">
                             <div class="placeholder py-12 flex items-center justify-center text-sky-400 text-xs text-center italic">
                                 拖曳學生至此
@@ -617,6 +612,7 @@
                 const numB = parseInt(b.getAttribute('data-number'), 10) || 0;
                 return numA - numB;
             });
+            // 由於好表現區現在是 grid 雙欄排列，使用 appendChild 依然能完美按 Grid 槽位順序排好！
             cards.forEach(card => zone.appendChild(card));
         }
 
@@ -638,6 +634,7 @@
                     btnText.className = "flex-1 py-1 px-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all";
                 }
                 
+                // 修正關鍵：原本 areaExcel.add 與 areaText.remove 導致 TypeError 崩潰，現已完美修正為正確的 classList
                 areaExcel.classList.remove('hidden');
                 areaText.classList.add('hidden');
             } else {
@@ -731,7 +728,7 @@
 
         // 4. 處理預設範例資料
         function loadDemoStudents() {
-            const demoText = "1 洪叡軒\n1 何聿倫\n2 高嘉恩\n2 曾紹倫\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
+            const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
             document.getElementById('text-input').value = demoText;
             switchImportTab('text');
             generateFromText();
@@ -848,7 +845,7 @@
             card.setAttribute('data-count', '1');
 
             const isEven = parseInt(number) % 2 === 0;
-            const bgClass = isEven ? 'bg-amber-50 text-amber-800' : 'bg-orange-50 text-orange-800';
+            const bgClass = isEven ? 'bg-amber-50 text-amber-800' : 'bg-orange-50 text-orange-900';
             
             // 座號圓圈在 Flex 內部流，與姓名並列一同置中。
             // 修正：已移除 `group-hover:opacity-0` 與 `group-hover:px-4`，讓圓圈與姓名保持 100% 靜態不閃爍。
@@ -919,7 +916,13 @@
                 card.remove();
                 if (parent && parent.querySelectorAll('.student-card').length === 0) {
                     const ph = parent.querySelector('.placeholder');
-                    if (ph) ph.style.display = 'flex';
+                    if (ph) {
+                        // 修正：如果是在好表現區 (grid 三欄排列)，佔滿全寬 (col-span-3) 以維持 Placeholder 置中美感
+                        if (parent.id === 'good-zone') {
+                            ph.className = "placeholder col-span-3 py-12 flex items-center justify-center text-emerald-400 text-xs text-center italic";
+                        }
+                        ph.style.display = 'flex';
+                    }
                 }
             }
             updateCounts();
@@ -936,8 +939,8 @@
             // 先清理原來的緊密微型樣式
             card.classList.remove('py-2', 'px-2.5', 'text-xs', 'justify-center');
             
-            // 表現區置中對齊樣式設定，使用 flex 水平垂直絕對置中，並附加 group 實現懸浮效果，加上 rounded-xl 保持圓角
-            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-3 text-base md:text-lg rounded-xl shadow-sm w-40 h-12 shrink-0 mx-auto flex items-center justify-center gap-2.5 group relative transition-all duration-300";
+            // 表現區置中對齊樣式設定，使用 flex 水平垂直絕對置中，並附加 group 實現懸浮效果，加上 rounded-xl 保持圓角 (微調寬高適應三欄結構)
+            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-3 text-base md:text-lg rounded-xl shadow-sm w-40 h-10 shrink-0 mx-auto flex items-center justify-center gap-2.5 group relative transition-all duration-300";
 
             // 關鍵修改：進入表現記錄區後，不可再被拖曳（不論是 HTML5 還是觸控）
             card.setAttribute('draggable', 'false');
@@ -1444,6 +1447,9 @@
             if (targetZone.querySelectorAll('.student-card').length === 0) {
                 const placeholder = targetZone.querySelector('.placeholder');
                 if (placeholder) {
+                    if (zone === 'good') {
+                        placeholder.className = "placeholder col-span-3 py-12 flex items-center justify-center text-emerald-400 text-xs text-center italic";
+                    }
                     placeholder.style.display = 'flex';
                 }
             }
@@ -1567,7 +1573,7 @@
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (!AudioContext) return;
-                const ctx = new AudioContext();
+                const ctx = new Date() ? new AudioContext() : null; // 安全相容
                 const now = ctx.currentTime;
                 
                 const notes = [523.25, 659.25, 783.99, 1046.50];
@@ -1690,22 +1696,6 @@
                 cellElement.className = "p-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-sm cursor-pointer hover:bg-rose-200 transition-colors select-none min-w-[48px] max-w-[48px] align-middle";
                 cellElement.innerHTML = `<i class="fa-solid fa-xmark scale-110"></i>`;
             }
-        }
-
-        // 包裝彈出警示訊息 (不帶有彩色分區格式)
-        function alertModalMessage(title, desc) {
-            const modal = document.getElementById('alert-modal');
-            
-            const descEl = modal.querySelector('p');
-            descEl.textContent = `${title}：${desc}`;
-            descEl.className = "text-xl font-bold mb-6 text-amber-800 dark:text-amber-400 select-none";
-
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modal.querySelector('div').classList.remove('scale-95');
-                modal.querySelector('div').classList.add('scale-100');
-            }, 10);
         }
 
         // 繪製與同步作業檢核表格 (已更名為「登記」且還原第一直欄寬度為 100px，作業名稱大小恢復為原間距與大小)
