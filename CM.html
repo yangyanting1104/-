@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班級經營互動看板</title>
+    <!-- 設置網站瀏覽器分頁小圖示 (Favicon) -->
+    <link class="favicon" rel="icon" type="image/png" href="貓臉logo1.png">
+    <!-- 引入 Tailwind CSS 提供現代化、響應式的排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome 提供可愛的圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Google Fonts 採用圓潤可愛的字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 SheetJS 用宇解析 Excel 檔案 (.xlsx / .xls) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #fdf6ec; /* 暖色調、舒服的米黃色背景 */
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+        /* 自訂粉彩陰影與圓角，讓畫面看起來更像國小教室的實體看板 */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border: 2px solid #f3e5d8;
+            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+        }
+        /* 拖曳時的視覺效果 */
+        .dragging {
+            opacity: 0.5;
+            transform: scale(1.05);
+        }
+        /* 讓拖曳目標區域在有東西懸停時產生動態邊框效果 (日間模式) */
+        .drag-hover {
+            border-color: #f59e0b !important;
+            background-color: #fef3c7 !important;
+        }
+        
+        /* ==========================================
+           【微互動】午休夜間模式下，名牌懸停於各表現區時的反白樣式 
+           ========================================== */
+        body.dark-mode .good-zone-hover {
+            border-color: #10b981 !important;
+            background-color: rgba(16, 185, 129, 0.08) !important;
+        }
+        body.dark-mode .bad-zone-hover {
+            border-color: #fb7185 !important;
+            background-color: rgba(244, 63, 94, 0.08) !important;
+        }
+        body.dark-mode .toilet-zone-hover {
+            border-color: #38bdf8 !important;
+            background-color: rgba(14, 165, 233, 0.08) !important;
+        }
+
+        /* 滾動條美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fdf6ec;
+            border-radius: 4px;
+            transition: background-color 0.4s ease;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 4px;
+            transition: background-color 0.4s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+        }
+        /* 直書專用 CSS 樣式：確保中文字體直立不歪斜 */
+        .vertical-header {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            white-space: nowrap;
+            letter-spacing: 0.1em;
+        }
+
+        /* 動畫緩速旋轉，用於夜間模式按鈕 */
+        .animate-spin-slow {
+            animation: spin 8s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==========================================
+           【午休夜間模式】深色主題 CSS 覆蓋樣式 
+           ========================================== */
+        body.dark-mode {
+            background-color: #0f1015;
+            color: #94a3b8;
+        }
+        body.dark-mode ::-webkit-scrollbar-track {
+            background: #0f1015;
+        }
+        body.dark-mode ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+        }
+        body.dark-mode ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        body.dark-mode .glass-panel {
+            background: rgba(17, 22, 37, 0.9);
+            border-color: #1e2536;
+            color: #cbd5e1;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        body.dark-mode .student-card {
+            background-color: #1a1f35;
+            border-color: #262e42;
+        }
+        body.dark-mode .student-card span.text-amber-950 {
+            color: #cbd5e1 !important;
+        }
+        body.dark-mode #student-pool {
+            background-color: rgba(22, 30, 49, 0.4);
+        }
+        body.dark-mode .group\/circle:hover {
+            background-color: #334155 !important;
+            color: #fb7185 !important;
+        }
+        body.dark-mode h1 {
+            color: #d97706 !important;
+        }
+        body.dark-mode h2 {
+            color: #e2e8f0 !important;
+        }
+        body.dark-mode .bg-emerald-50\/50 {
+            background-color: rgba(4, 120, 87, 0.15) !important;
+            border-color: rgba(16, 185, 129, 0.2) !important;
+        }
+        body.dark-mode .bg-rose-50\/50 {
+            background-color: rgba(190, 18, 60, 0.12) !important;
+            border-color: rgba(244, 63, 94, 0.2) !important;
+        }
+        body.dark-mode .bg-sky-50\/50 {
+            background-color: rgba(14, 116, 144, 0.12) !important;
+            border-color: rgba(6, 182, 212, 0.2) !important;
+        }
+        body.dark-mode input, body.dark-mode textarea {
+            background-color: #1a1f35 !important;
+            color: #cbd5e1 !important;
+            border-color: #2d364f !important;
+        }
+        body.dark-mode .bg-amber-50 {
+            background-color: #2a1e12 !important;
+            color: #fde047 !important;
+            border-color: #382818 !important;
+        }
+        body.dark-mode .bg-amber-100\/30 {
+            background-color: rgba(217, 119, 6, 0.08) !important;
+        }
+        body.dark-mode th.sticky, 
+        body.dark-mode td.sticky {
+            background-color: #111625 !important;
+            color: #94a3b8 !important;
+        }
+        body.dark-mode td, body.dark-mode th {
+            border-color: #202636 !important;
+        }
+        
+        body.dark-mode .bg-rose-100 {
+            background-color: rgba(244, 63, 94, 0.12) !important; 
+            border-color: rgba(244, 63, 94, 0.15) !important;
+            color: #fb7185 !important;
+        }
+        body.dark-mode .bg-emerald-50 {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            color: #10b981 !important;
+        }
+        body.dark-mode .bg-sky-50 {
+            background-color: rgba(6, 182, 212, 0.12) !important;
+            color: #06b6d4 !important;
+        }
+        body.dark-mode .text-emerald-600 {
+            color: #10b981 !important;
+        }
+        body.dark-mode .text-rose-600 {
+            color: #fb7185 !important;
+        }
+        body.dark-mode .text-sky-600 {
+            color: #06b6d4 !important;
+        }
+        body.dark-mode .text-stone-700 {
+            color: #94a3b8 !important;
+        }
+        body.dark-mode .bg-stone-100 {
+            background-color: #1e2638 !important;
+            color: #cbd5e1 !important;
+            border-color: #2d364f !important;
+        }
+        body.dark-mode .bg-orange-100 {
+            background-color: #2d1303 !important;
+            color: #fed7aa !important;
+        }
+        body.dark-mode .bg-amber-100\/50 {
+            background-color: rgba(217, 119, 6, 0.12) !important;
+        }
+        body.dark-mode .bg-amber-100 {
+            background-color: #24190b !important;
+            color: #fef08a !important;
+        }
+        body.dark-mode .bg-orange-50 {
+            background-color: #1f1008 !important;
+            color: #ffedd5 !important;
+        }
+        
+        body.dark-mode .bg-emerald-100 {
+            background-color: rgba(16, 185, 129, 0.15) !important;
+            color: #34d399 !important;
+        }
+        body.dark-mode .bg-sky-100 {
+            background-color: rgba(14, 165, 233, 0.15) !important;
+            color: #38bdf8 !important;
+        }
+        
+        body.dark-mode #timer-display-good {
+            color: #34d399 !important;
+        }
+        body.dark-mode #timer-display-bad {
+            color: #fb7185 !important;
+        }
+        body.dark-mode #timer-display-toilet {
+            color: #38bdf8 !important;
+        }
+
+        body.dark-mode .star-badge {
+            background-color: #d97706 !important;
+            border-color: #f59e0b !important;
+            color: #fffbeb !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
+        }
+        body.dark-mode .lightning-badge {
+            background-color: #ea580c !important;
+            border-color: #f97316 !important;
+            color: #fff7ed !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
+        }
+        body.dark-mode .toilet-badge {
+            background-color: #0284c7 !important;
+            border-color: #0ea5e9 !important;
+            color: #f0f9ff !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+        }
+        
+        body.dark-mode .tab-inactive-dark {
+            background-color: #1e2638 !important;
+            color: #a7f3d0 !important;
+        }
+        body.dark-mode .tab-inactive-dark:hover {
+            background-color: #2d364f !important;
+        }
+        body.dark-mode .group\/circle:hover {
+            background-color: #334155 !important;
+            color: #fb7185 !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-6 text-gray-700 overflow-y-auto relative">
+
+    <!-- Left Upper Floating Clock -->
+    <div class="absolute top-4 left-4 md:top-6 md:left-6 z-50">
+        <div class="glass-panel py-2 px-3.5 rounded-full shadow-md flex items-center gap-2 font-bold text-xs md:text-sm bg-white/95 select-none transition-all">
+            <i class="fa-regular fa-clock text-amber-500"></i>
+            <span id="utc-clock">載入時間中...</span>
+        </div>
+    </div>
+
+    <!-- Theme Toggle Button -->
+    <div class="absolute top-4 right-4 md:top-6 md:right-6 z-50">
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="glass-panel py-2 px-3.5 rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-2 font-bold text-xs md:text-sm bg-white/95 hover:scale-105 active:scale-95">
+            <i id="theme-icon" class="fa-solid fa-moon text-amber-500 text-sm md:text-base animate-pulse"></i>
+            <span id="theme-text" class="select-none">午休夜間模式</span>
+        </button>
+    </div>
+
+    <!-- Header Section -->
+    <header class="text-center mb-4 shrink-0 px-24">
+        <h1 class="text-2xl md:text-3xl font-bold text-[#b45309] flex items-center justify-center gap-2">
+            <i class="fa-solid fa-graduation-cap text-[#f59e0b]"></i>
+            班級經營互動看板
+        </h1>
+        <p class="text-gray-500 text-xs md:text-[12px]">互動式行為表現與作業檢核系統</p>
+    </header>
+
+    <!-- Main Grid Section -->
+    <!-- 將左右主要欄位的比例改為 3.2:8.8 -->
+    <main class="grid grid-cols-1 lg:grid-cols-[3.2fr_8.8fr] gap-5 lg:h-[600px] shrink-0 min-h-0 mb-6">
+        
+        <!-- Left Column: Student List Area -->
+        <section class="flex flex-col h-full min-h-0">
+            <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0">
+                <h2 class="text-lg font-bold text-[#78350f] mb-3 flex items-center justify-between shrink-0 border-b border-amber-100 pb-2">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-users text-[#d97706]"></i>
+                        學生資訊管理
+                    </span>
+                </h2>
+                
+                <!-- 內部 3:7 比例 -->
+                <div class="grid grid-cols-1 lg:grid-cols-[3fr_7fr] gap-4 flex-grow min-h-0">
+                    
+                    <!-- 第一欄：控制台 -->
+                    <div class="flex flex-col gap-3 justify-between h-full overflow-y-auto pr-1">
+                        <div class="space-y-3">
+                            <!-- Excel 匯入按鈕 -->
+                            <div id="import-excel-area" class="shrink-0">
+                                <div class="border-2 border-dashed border-amber-200 rounded-xl p-1.5 text-center bg-amber-50/50 hover:bg-amber-50 transition-colors cursor-pointer relative">
+                                    <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleExcelUpload(event)">
+                                    <i class="fa-regular fa-file-excel text-base text-emerald-600 mb-0.5"></i>
+                                    <p class="text-[10px] text-gray-600 font-bold leading-tight">Excel/CSV 匯入</p>
+                                </div>
+                            </div>
+
+                            <!-- 手動貼上與手動輸入框 -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="text-sm font-bold text-amber-800">手動貼上：</label>
+                                    <button onclick="loadDemoStudents()" class="text-[8px] bg-stone-200 text-stone-700 px-1 py-0.5 rounded hover:bg-stone-300 dark:bg-stone-800 dark:text-stone-300 transition-all">範例</button>
+                                </div>
+                                <textarea id="text-input" class="w-full text-xs p-1.5 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white/70 mb-1.5 h-[300px] resize-none leading-normal" placeholder="格式：&#13;01 洪叡軒&#13;02 何聿倫"></textarea>
+                                
+                                <button onclick="generateFromText()" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold py-1.5 px-1.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-0.5">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> 生成名牌
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 自動彙整人數統計 -->
+                        <div class="border-t border-amber-100 pt-2.5 mt-auto shrink-0 text-center">
+                            <p class="text-[10px] text-gray-400 font-medium">班級人數統計</p>
+                            <div id="left-student-count" class="text-sm font-black text-amber-800 bg-amber-100/60 rounded-xl py-0.5 mt-0.5 select-none">
+                                共 0 人
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 第二欄及第三欄：學生名牌區 -->
+                    <div class="flex flex-col h-full min-h-0 bg-amber-50/30 border border-amber-100 rounded-xl p-2.5">
+                        <div class="text-sm font-bold text-[#78350f] mb-2 flex items-center justify-between shrink-0">
+                            <span><i class="fa-solid fa-grip text-amber-500 mr-1"></i>學生名牌</span>
+                            <span class="text-[10px] text-gray-400 font-normal">可拖曳或使用邊角按鈕點擊</span>
+                        </div>
+                        <div id="student-pool" class="grid grid-cols-2 gap-1.5 overflow-y-auto flex-grow min-h-0 pr-1">
+                            <div class="col-span-full py-12 text-center text-gray-400 text-xs">
+                                <i class="fa-solid fa-arrow-left text-lg mb-2 block animate-bounce"></i>
+                                請在左欄匯入名單以生成方塊
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Performance Zones Area -->
+        <section class="flex flex-col h-full min-h-0">
+            <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0 gap-3">
+                <h2 class="text-lg font-bold text-[#78350f] shrink-0 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-star text-amber-500"></i>
+                        表現記錄區
+                    </span>
+                    <!-- 【關鍵修改】在右上角新增精美儲存按鈕 -->
+                    <button id="btn-save-cloud" onclick="saveRecordToSpreadsheet()" class="bg-amber-600 hover:bg-emerald-600 text-white font-extrabold text-xs py-1.5 px-4 rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> 儲存今日紀錄
+                    </button>
+                </h2>
+
+                <!-- 三分小區：欄位比例為 58% : 21% : 21% -->
+                <div class="flex flex-col md:flex-row gap-4 flex-grow min-h-0 w-full">
+                    
+                    <!-- 1. 好表現區 — 58% -->
+                    <div class="bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between w-full md:w-[58%]">
+                        <div class="flex items-center gap-1.5 mb-1.5 text-emerald-700 font-bold border-b border-emerald-100 pb-1.5 shrink-0 text-lg">
+                            <i class="fa-regular fa-face-laugh-beam text-lg text-emerald-500"></i>
+                            <span>好表現區</span>
+                            <span id="good-count" class="ml-auto text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">0 人</span>
+                        </div>
+                        
+                        <div id="good-zone" class="drag-zone flex-grow overflow-y-auto grid grid-cols-3 gap-2 p-1 min-h-0 rounded-xl transition-all items-start justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'good')">
+                            <div class="placeholder col-span-3 py-12 flex items-center justify-center text-emerald-400 text-xs text-center italic">
+                                拖曳名牌/點擊名牌左側笑臉新增至此
+                            </div>
+                        </div>
+
+                        <!-- 獨立計時器 (預設5分鐘) -->
+                        <div class="border-t border-emerald-100/70 pt-2.5 mt-2 shrink-0 bg-white/40 dark:bg-slate-900/20 p-2 rounded-xl">
+                            <div class="flex items-center justify-center gap-1 text-[10px] mb-1.5 font-medium">
+                                <span class="text-emerald-800 dark:text-emerald-300">設定：</span>
+                                <input type="number" id="input-mins-good" value="5" min="0" max="99" class="w-8 text-center border border-emerald-200 rounded p-0.5 text-emerald-900 focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                                <span class="text-emerald-700">分</span>
+                                <input type="number" id="input-secs-good" value="0" min="0" max="59" class="w-8 text-center border border-emerald-200 rounded p-0.5 text-emerald-900 focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                                <span class="text-emerald-700">秒</span>
+                                <button onclick="applyZoneTime('good')" class="ml-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200 px-1.5 py-0.5 rounded text-[9px] font-extrabold hover:bg-emerald-200 transition-all">套用</button>
+                            </div>
+                            <div class="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl border border-emerald-100/50">
+                                <div id="timer-display-good" class="text-lg md:text-xl font-black text-emerald-700 dark:text-emerald-400 font-mono tracking-wider">05:00</div>
+                                <div class="flex gap-1">
+                                    <button id="btn-toggle-good" onclick="toggleZoneTimer('good')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] py-1 px-2 rounded-lg flex items-center gap-0.5 font-bold transition-all shadow-sm">
+                                        <i id="icon-toggle-good" class="fa-solid fa-play"></i><span id="text-toggle-good">開始</span>
+                                    </button>
+                                    <button onclick="resetZoneTimer('good')" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-[10px] py-1 px-1.5 rounded-lg font-bold transition-all" title="重設">
+                                        <i class="fa-solid fa-rotate-left"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 待改進區 — 21% -->
+                    <div class="bg-rose-50/50 border-2 border-rose-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between w-full md:w-[21%]">
+                        <div class="flex items-center gap-1.5 mb-1.5 text-rose-700 font-bold border-b border-rose-100 pb-1.5 shrink-0 text-lg">
+                            <i class="fa-regular fa-face-sad-tear text-lg text-rose-500"></i>
+                            <span>待改進區</span>
+                            <span id="bad-count" class="ml-auto text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded-full">0 人</span>
+                        </div>
+                        
+                        <div id="bad-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-1 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'bad')">
+                            <div class="placeholder py-12 flex items-center justify-center text-rose-400 text-xs text-center italic">
+                                拖曳名牌/點擊名牌右側哭臉新增至此
+                            </div>
+                        </div>
+
+                        <!-- 獨立計時器 (預設4分鐘) -->
+                        <div class="border-t border-rose-100/70 pt-2.5 mt-2 shrink-0 bg-white/40 dark:bg-slate-900/20 p-2 rounded-xl">
+                            <div class="flex items-center justify-center gap-1 text-[10px] mb-1.5 font-medium">
+                                <span class="text-rose-800 dark:text-rose-300">設定:</span>
+                                <input type="number" id="input-mins-bad" value="4" min="0" max="99" class="w-8 text-center border border-rose-200 rounded p-0.5 text-rose-900 focus:outline-none focus:ring-1 focus:ring-rose-400">
+                                <span class="text-rose-700">分</span>
+                                <input type="number" id="input-secs-bad" value="0" min="0" max="59" class="w-8 text-center border border-rose-200 rounded p-0.5 text-rose-900 focus:outline-none focus:ring-1 focus:ring-rose-400">
+                                <span class="text-rose-700">秒</span>
+                                <button onclick="applyZoneTime('bad')" class="ml-1 bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-200 px-1.5 py-0.5 rounded text-[9px] font-extrabold hover:bg-emerald-200 transition-all">套用</button>
+                            </div>
+                            <div class="flex items-center justify-between bg-rose-50/50 dark:bg-slate-950/15 px-2.5 py-1.5 rounded-xl border border-rose-100/70">
+                                <div id="timer-display-bad" class="text-lg md:text-xl font-black text-rose-700 dark:text-rose-400 font-mono tracking-wider">04:00</div>
+                                <div class="flex gap-1">
+                                    <button id="btn-toggle-bad" onclick="toggleZoneTimer('bad')" class="bg-rose-500 hover:bg-rose-600 text-white text-[10px] py-1 px-2 rounded-lg flex items-center gap-0.5 font-bold transition-all shadow-sm">
+                                        <i id="icon-toggle-bad" class="fa-solid fa-play"></i><span id="text-toggle-bad">開始</span>
+                                    </button>
+                                    <button onclick="resetZoneTimer('bad')" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-[10px] py-1 px-1.5 rounded-lg font-bold transition-all" title="重設">
+                                        <i class="fa-solid fa-rotate-left"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 課間上廁所區 — 21% -->
+                    <div class="bg-sky-50/50 border-2 border-sky-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between w-full md:w-[21%]">
+                        <div class="flex items-center gap-1.5 mb-1.5 text-sky-700 font-bold border-b border-sky-100 pb-1.5 shrink-0 text-lg">
+                            <i class="fa-solid fa-restroom text-lg text-sky-500"></i>
+                            <span>課間上廁所</span>
+                            <span id="toilet-count" class="ml-auto text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded-full">0 人</span>
+                        </div>
+                        
+                        <div id="toilet-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-1 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'toilet')">
+                            <div class="placeholder py-12 flex items-center justify-center text-sky-400 text-xs text-center italic">
+                                拖曳名牌至此
+                            </div>
+                        </div>
+
+                        <!-- 獨立計時器 (預設2分鐘) -->
+                        <div class="border-t border-sky-100/70 pt-2.5 mt-2 shrink-0 bg-white/40 dark:bg-slate-900/20 p-2 rounded-xl">
+                            <div class="flex items-center justify-center gap-1 text-[10px] mb-1.5 font-medium">
+                                <span class="text-sky-800 dark:text-sky-300">設定：</span>
+                                <input type="number" id="input-mins-toilet" value="2" min="0" max="99" class="w-8 text-center border border-sky-200 rounded p-0.5 text-sky-900 focus:outline-none focus:ring-1 focus:ring-sky-400">
+                                <span class="text-sky-700">分</span>
+                                <input type="number" id="input-secs-toilet" value="0" min="0" max="59" class="w-8 text-center border border-sky-200 rounded p-0.5 text-sky-900 focus:outline-none focus:ring-1 focus:ring-sky-400">
+                                <span class="text-sky-700">秒</span>
+                                <button onclick="applyZoneTime('toilet')" class="ml-1 bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-200 px-1.5 py-0.5 rounded text-[9px] font-extrabold hover:bg-emerald-200 transition-all">套用</button>
+                            </div>
+                            <div class="flex items-center justify-between bg-sky-50 dark:bg-sky-950/40 px-2.5 py-1.5 rounded-xl border border-sky-100/50">
+                                <div id="timer-display-toilet" class="text-lg md:text-xl font-black text-sky-700 dark:text-sky-400 font-mono tracking-wider">02:00</div>
+                                <div class="flex gap-1">
+                                    <button id="btn-toggle-toilet" onclick="toggleZoneTimer('toilet')" class="bg-sky-500 hover:bg-sky-600 text-white text-[10px] py-1 px-2 rounded-lg flex items-center gap-0.5 font-bold transition-all shadow-sm">
+                                        <i id="icon-toggle-toilet" class="fa-solid fa-play"></i><span id="text-toggle-toilet">開始</span>
+                                    </button>
+                                    <button onclick="resetZoneTimer('toilet')" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-[10px] py-1 px-1.5 rounded-lg font-bold transition-all" title="重設">
+                                        <i class="fa-solid fa-rotate-left"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 下方第四區塊：作業檢核區 -->
+    <section class="w-full shrink-0">
+        <div class="glass-panel rounded-2xl p-5 shadow-sm flex flex-col bg-white/90">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 pb-3 border-b border-amber-100">
+                <h2 class="text-xl font-bold text-[#78350f] flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-amber-600"></i>
+                    作業檢核區
+                </h2>
+                <div class="flex items-center gap-2 bg-amber-50 p-1.5 rounded-xl border border-amber-100 max-w-lg w-full">
+                    <input type="text" id="hw-name-input" placeholder="請打字輸入作業名稱 (例如：國習、數單)" class="flex-grow text-sm bg-white border border-amber-200 rounded-lg py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+                    <button onclick="addHomeworkItem()" class="bg-amber-500 hover:bg-emerald-600 text-white font-bold text-sm py-1.5 px-4 rounded-lg transition-all shadow-sm shrink-0">
+                        <i class="fa-solid fa-plus mr-1"></i>新增作業
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto w-full border border-amber-100 rounded-xl bg-amber-50/10">
+                <table class="w-full border-collapse text-center">
+                    <thead>
+                        <tr id="hw-table-header" class="bg-amber-100/50 text-[#78350f] font-bold text-sm">
+                            <th class="py-6 px-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-lg text-center align-middle">登記</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hw-table-body" class="divide-y divide-amber-90 text-xs md:text-sm">
+                        <tr>
+                            <td class="p-8 text-gray-400 italic text-center" colspan="100%">
+                                <i class="fa-solid fa-circle-info mr-1"></i> 請先至上方匯入學生名單，並於右上角輸入作業名稱以啟用檢核表格。
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="flex gap-4 items-center justify-end mt-3 text-xs text-gray-500">
+                <span class="flex items-center gap-1">
+                    <span class="w-4 h-4 rounded bg-rose-100 border border-rose-300 inline-block text-center text-[10px] text-rose-600 leading-none">✗</span>
+                    未完成 / 未繳交 (色塊)
+                </span>
+                <span class="flex items-center gap-1">
+                    <span class="w-4 h-4 rounded bg-emerald-50 border border-emerald-200 inline-block text-center text-[10px] text-emerald-600 leading-none">✓</span>
+                    已完成 / 已繳交 (無色塊)
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 自訂一般時間到警示彈出視窗 -->
+    <div id="alert-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full mx-4 shadow-2xl border-4 border-amber-400 text-center transform scale-95 transition-transform duration-300">
+            <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <i id="alert-icon-bell" class="fa-solid fa-bell text-4xl text-amber-500"></i>
+            </div>
+            <p id="alert-modal-desc" class="text-gray-600 mb-6 font-medium">叮咚～時間到！</p>
+            <p id="alert-modal-details" class="text-gray-500 text-sm mt-2"></p>
+            <button onclick="closeAlertModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all text-lg focus:ring-4 focus:ring-amber-200">
+                確認
+            </button>
+        </div>
+    </div>
+
+    <!-- 🎉 【BINGO慶祝特效】 -->
+    <div id="celebration-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center hidden opacity-0 transition-opacity duration-500">
+        <div class="relative text-center transform scale-90 transition-transform duration-500 max-w-sm w-full mx-4 p-8 bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-400 rounded-3xl shadow-2xl border-4 border-white text-white">
+            <canvas id="celebration-canvas" class="absolute inset-0 w-full h-full pointer-events-none rounded-2xl"></canvas>
+            <div class="relative z-10">
+                <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                    <i class="fa-solid fa-trophy text-4xl text-yellow-300"></i>
+                </div>
+                <div class="inline-block bg-yellow-300 text-amber-950 font-black px-4 py-1 rounded-full text-xs mb-3 tracking-widest shadow-md animate-pulse">
+                    ⭐ BINGO! ⭐
+                </div>
+                <h2 class="text-2xl font-black mb-1 tracking-wide text-white drop-shadow-md">作業全數完成！</h2>
+                <p id="celebration-student-info" class="text-xl font-extrabold mb-5 text-yellow-100 drop-shadow-sm">01號 王小明</p>
+                <button onclick="closeCelebration()" class="w-full bg-white hover:bg-yellow-100 text-orange-600 font-bold py-2.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all text-base focus:ring-4 focus:ring-yellow-300 active:scale-95">
+                    超級棒！
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav" preload="auto"></audio>
+
+    <footer class="mt-8 mb-4 text-center text-[11px] text-gray-400 shrink-0">
+        <p>© 班級經營互動看板作者 — 雁婷老師</p>
+    </footer>
+
+    <!-- 主要 JavaScript 邏輯控制 -->
+    <script>
+        // ========================================================
+        // 📢 【雁婷老師請注意：雲端試算表串接設定】
+        // 請將下方引號內的網址，更換為您部署 GAS 網路應用程式後產生的「網頁應用程式 URL」！
+        // ========================================================
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwdmFshgeMqMujqYpCdbNv0zEyhxynz5va43_1Nr0D97sJQ8XVSK1QNSGD_tYyqWBqf/exec";
+
+
+        // 1. 初始化資料與狀態
+        let studentsList = []; // 儲存學生原始名單 {number, name}
+        let totalCreatedCount = 0; // 用於生成唯一 ID
+        let homeworkList = []; // 儲存作業清單 (字串陣列)
+        let homeworkStatus = {}; // 儲存作業收繳狀態對照表
+
+        // 獨立區域計時器資料結構
+        let timers = {
+            good: { remaining: 300, total: 300, running: false, interval: null, defaultMins: 5 },
+            bad: { remaining: 240, total: 240, running: false, interval: null, defaultMins: 4 },
+            toilet: { remaining: 120, total: 120, running: false, interval: null, defaultMins: 2 }
+        };
+
+        // 追蹤當前觸發計時歸零的區域
+        let currentTimeoutZone = null;
+
+        // 五彩灑花 Canvas 相關變數
+        let confettiActive = false;
+        let confettiParticles = [];
+        const confettiColors = ['#f43f5e', '#10b981', '#06b6d4', '#f59e0b', '#ec4899', '#3b82f6', '#ffffff', '#eab308'];
+
+        // 2. 依座號排序指定表現區域內的所有學生卡片
+        function sortZoneCards(zone) {
+            const cards = Array.from(zone.querySelectorAll('.student-card'));
+            cards.sort((a, b) => {
+                const numA = parseInt(a.getAttribute('data-number'), 10) || 0;
+                const numB = parseInt(b.getAttribute('data-number'), 10) || 0;
+                return numA - numB;
+            });
+            cards.forEach(card => zone.appendChild(card));
+        }
+
+        // ==========================================
+        // 拖放事件相關處理函數
+        // ==========================================
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', this.id);
+            e.dataTransfer.effectAllowed = 'copyMove';
+        }
+
+        // 懸停時的反白特效
+        function dragEnter(e) {
+            e.preventDefault();
+            const zone = e.currentTarget;
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            
+            if (isDarkMode) {
+                if (zone.id === 'good-zone') {
+                    zone.classList.add('good-zone-hover');
+                } else if (zone.id === 'bad-zone') {
+                    zone.classList.add('bad-zone-hover');
+                } else if (zone.id === 'toilet-zone') {
+                    zone.classList.add('toilet-zone-hover');
+                }
+            } else {
+                zone.classList.add('drag-hover');
+            }
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function dragLeave(e) {
+            const zone = e.currentTarget;
+            zone.classList.remove('drag-hover');
+            zone.classList.remove('good-zone-hover');
+            zone.classList.remove('bad-zone-hover');
+            zone.classList.remove('toilet-zone-hover');
+        }
+
+        function handleDrop(e, zoneType) {
+            e.preventDefault();
+            const zone = e.currentTarget;
+            zone.classList.remove('drag-hover');
+            zone.classList.remove('good-zone-hover');
+            zone.classList.remove('bad-zone-hover');
+            zone.classList.remove('toilet-zone-hover');
+
+            const id = e.dataTransfer.getData('text/plain');
+            const sourceCard = document.getElementById(id);
+
+            if (!sourceCard) return;
+
+            const number = sourceCard.getAttribute('data-number');
+            const name = sourceCard.getAttribute('data-name');
+
+            addStudentToZone(number, name, zoneType, sourceCard);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedElement = null;
+            document.querySelectorAll('.drag-zone').forEach(zone => {
+                zone.classList.remove('drag-hover');
+                zone.classList.remove('good-zone-hover');
+                zone.classList.remove('bad-zone-hover');
+                zone.classList.remove('toilet-zone-hover');
+            });
+        }
+
+        // 4. 處理預設範例資料
+        function loadDemoStudents() {
+            const demoText = "1 洪叡軒\n1 何聿倫\n2 曾紹倫\n2 高嘉恩\n3 周紹群\n4 廖恩可\n5 陳熙文\n6 謝睿陽\n7 何仲偉\n7 陳柏琛\n9 王宥傑\n10 林詩芸\n11 吳苡樂\n12 陳蕾伊\n13 林亞歆\n13 黃佳營\n14 林雨霏\n15 周育欣\n16 吳依宸\n17 黃苡真\n18 陳泓鈺";
+            document.getElementById('text-input').value = demoText;
+            generateFromText();
+            
+            if (homeworkList.length === 0) {
+                homeworkList = ["國語", "數學", "閱讀"];
+                renderHomeworkTable();
+            }
+        }
+
+        // 5. 解析 Excel 檔案
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                
+                let parsedStudents = [];
+                rows.forEach((row, index) => {
+                    if (row.length >= 2 && row[0] !== undefined && row[1] !== undefined) {
+                        let number = String(row[0]).trim();
+                        let name = String(row[1]).trim();
+                        if (number && name) {
+                            parsedStudents.push({ number, name });
+                        }
+                    }
+                });
+
+                if (parsedStudents.length > 0) {
+                    studentsList = parsedStudents;
+                    renderStudentPool();
+                    renderHomeworkTable();
+                } else {
+                    alertModalMessage("無法解析名單", "請確認 Excel 檔案的第一欄為座號，第二欄為姓名！");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 6. 解析手動貼上的文字
+        function generateFromText() {
+            const text = document.getElementById('text-input').value.trim();
+            if (!text) {
+                alertModalMessage("提示", "請輸入學生座號與姓名資料！");
+                return;
+            }
+
+            const lines = text.split('\n');
+            let parsedStudents = [];
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+
+                const parts = line.split(/[\s,，\t]+/);
+                if (parts.length >= 2) {
+                    const number = parts[0];
+                    const name = parts.slice(1).join(' ');
+                    parsedStudents.push({ number, name });
+                }
+            });
+
+            if (parsedStudents.length > 0) {
+                studentsList = parsedStudents;
+                renderStudentPool();
+                renderHomeworkTable();
+            } else {
+                alertModalMessage("解析失敗", "格式似乎不正確，請參考範例格式：\n01 王小明");
+            }
+        }
+
+        // 7. 渲染「學生資訊管理」的學生方塊
+        function renderStudentPool() {
+            const pool = document.getElementById('student-pool');
+            pool.innerHTML = '';
+
+            const sc = document.getElementById('student-count');
+            const lsc = document.getElementById('left-student-count');
+
+            if (studentsList.length === 0) {
+                pool.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-gray-400 text-xs">
+                        <i class="fa-solid fa-arrow-left text-lg mb-2 block animate-bounce"></i>
+                        請先在左欄匯入名單以生成方塊
+                    </div>`;
+                if (sc) sc.textContent = '共 0 人';
+                if (lsc) lsc.textContent = '共 0 人';
+                return;
+            }
+
+            if (sc) sc.textContent = `共 ${studentsList.length} 人`;
+            if (lsc) lsc.textContent = `共 ${studentsList.length} 人`;
+
+            studentsList.forEach(student => {
+                const card = createStudentCard(student.number, student.name);
+                pool.appendChild(card);
+            });
+        }
+
+        // 8. 創建單一學生方塊 DOM 元素
+        function createStudentCard(number, name) {
+            totalCreatedCount++;
+            const uniqueId = `student-${totalCreatedCount}`;
+
+            const card = document.createElement('div');
+            card.id = uniqueId;
+            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-1.5 px-1.5 rounded-xl flex items-center justify-center gap-1 cursor-grab active:cursor-grabbing select-none transition-all text-xs font-semibold relative group";
+            card.setAttribute('draggable', 'true');
+            card.setAttribute('data-number', number);
+            card.setAttribute('data-name', name);
+            card.setAttribute('data-count', '1');
+
+            const isEven = parseInt(number) % 2 === 0;
+            const bgClass = isEven ? 'bg-amber-50 text-amber-800' : 'bg-orange-50 text-orange-900';
+            
+            card.innerHTML = `
+                <!-- 左側快速分發：笑臉 -->
+                <button class="quick-btn-left absolute left-0.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all text-emerald-500 hover:text-emerald-700 cursor-pointer z-20 p-0.5" title="一鍵加入好表現區">
+                    <i class="fa-regular fa-face-laugh-beam text-xs"></i>
+                </button>
+                
+                <span class="w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold ${bgClass} shrink-0 shadow-sm transition-all">
+                    ${number}
+                </span>
+                
+                <span class="truncate text-amber-950 font-bold px-0.5 transition-all">
+                    ${name}
+                </span>
+                
+                <!-- 右側快速分發：哭臉 -->
+                <button class="quick-btn-right absolute right-0.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all text-rose-500 hover:text-rose-700 cursor-pointer z-20 p-0.5" title="一鍵加入待改進區">
+                    <i class="fa-regular fa-face-sad-tear text-xs"></i>
+                </button>
+            `;
+
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+
+            setupTouchDrag(card);
+
+            const leftBtn = card.querySelector('.quick-btn-left');
+            const rightBtn = card.querySelector('.quick-btn-right');
+
+            leftBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                addStudentToZone(number, name, 'good', card);
+            });
+
+            rightBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                addStudentToZone(number, name, 'bad', card);
+            });
+
+            return card;
+        }
+
+        // 9. 移除卡片次數或整張移除
+        function removeSingleCardCount(card, zoneId) {
+            let count = parseInt(card.getAttribute('data-count') || 1);
+            if (count > 1) {
+                count--;
+                card.setAttribute('data-count', count);
+                
+                let badgeClass = zoneId === 'good' ? '.star-badge' : (zoneId === 'bad' ? '.lightning-badge' : '.toilet-badge');
+                let badge = card.querySelector(badgeClass);
+                if (badge) {
+                    if (count === 1) {
+                        badge.remove();
+                    } else {
+                        badge.querySelector('.badge-count').textContent = count;
+                    }
+                }
+            } else {
+                const parent = card.parentElement;
+                card.remove();
+                if (parent && parent.querySelectorAll('.student-card').length === 0) {
+                    const ph = parent.querySelector('.placeholder');
+                    if (ph) {
+                        if (parent.id === 'good-zone') {
+                            ph.className = "placeholder col-span-3 py-12 flex items-center justify-center text-emerald-400 text-xs text-center italic";
+                        }
+                        ph.style.display = 'flex';
+                    }
+                }
+            }
+            updateCounts();
+        }
+
+        // 10. 將學生卡片移入表現看板專區，並調整為大名牌版面
+        function moveCardToZone(card, zone) {
+            const placeholder = zone.querySelector('.placeholder');
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            
+            const number = card.getAttribute('data-number');
+            const isEven = parseInt(number, 10) % 2 === 0;
+            const bgClass = isEven ? 'bg-amber-50 text-amber-800' : 'bg-orange-50 text-orange-900';
+            
+            card.classList.remove('py-1.5', 'px-1.5', 'text-xs', 'justify-center');
+            card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-3 text-base md:text-lg rounded-xl shadow-sm w-40 h-10 shrink-0 mx-auto flex items-center justify-center gap-2.5 group relative transition-all duration-300";
+
+            card.setAttribute('draggable', 'false');
+            card.classList.remove('cursor-grab', 'active:cursor-grabbing');
+            card.classList.add('cursor-default');
+
+            const leftBtn = card.querySelector('.quick-btn-left'); if (leftBtn) leftBtn.remove();
+            const rightBtn = card.querySelector('.quick-btn-right'); if (rightBtn) rightBtn.remove();
+
+            const numSpan = card.querySelector('span:first-child');
+            if (numSpan) {
+                numSpan.className = `w-7 h-7 rounded-full flex items-center justify-center text-sm font-black shrink-0 shadow-sm transition-all cursor-pointer relative ${bgClass} hover:bg-stone-200 hover:text-stone-600 dark:hover:bg-slate-700 dark:hover:text-slate-200 group/circle z-10`;
+                numSpan.innerHTML = `
+                    <span class="group-hover/circle:hidden select-none">${number}</span>
+                    <i class="fa-regular fa-trash-can hidden group-hover/circle:block text-xs"></i>
+                `;
+                numSpan.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const parent = card.parentElement;
+                    const zoneId = parent ? parent.id.split('-')[0] : '';
+                    if (zoneId) {
+                        removeSingleCardCount(card, zoneId);
+                    } else {
+                        card.remove();
+                    }
+                };
+            }
+
+            const nameSpan = card.querySelector('span:nth-child(2)');
+            if (nameSpan) {
+                nameSpan.className = nameSpan.className.replace(/\b(px-[0-9.]+|w-full)\b/g, '').trim();
+                nameSpan.classList.remove('font-extrabold', 'text-center');
+                nameSpan.classList.add('font-bold', 'truncate');
+            }
+
+            const deleteBtn = card.querySelector('.delete-btn');
+            if (deleteBtn) deleteBtn.remove();
+
+            zone.appendChild(card);
+            sortZoneCards(zone);
+        }
+
+        // 11. 核心邏輯：登記學生表現至對應區域（並處理累計徽章與次數）
+        function addStudentToZone(number, name, zoneType, sourceCard) {
+            const isFromPool = sourceCard.parentElement.id === 'student-pool';
+            
+            const goodZone = document.getElementById('good-zone');
+            const badZone = document.getElementById('bad-zone');
+            const toiletZone = document.getElementById('toilet-zone');
+            const targetZone = zoneType === 'good' ? goodZone : (zoneType === 'bad' ? badZone : toiletZone);
+
+            if (!isFromPool) {
+                const star = sourceCard.querySelector('.star-badge'); if (star) star.remove();
+                const lightning = sourceCard.querySelector('.lightning-badge'); if (lightning) lightning.remove();
+                const toilet = sourceCard.querySelector('.toilet-badge'); if (toilet) toilet.remove();
+            }
+
+            if (zoneType === 'good') {
+                const existingCard = goodZone.querySelector(`.student-card[data-number="${number}"][data-name="${name}"]`);
+                if (existingCard) {
+                    let count = parseInt(existingCard.getAttribute('data-count') || 1);
+                    count++;
+                    existingCard.setAttribute('data-count', count);
+                    
+                    let badge = existingCard.querySelector('.star-badge');
+                    if (!badge) {
+                        badge = document.createElement('div');
+                        badge.className = "star-badge absolute -top-2.5 -right-2 bg-amber-400 border border-amber-300 text-amber-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
+                        badge.innerHTML = `<i class="fa-solid fa-star text-[8px] mr-0.5 text-amber-700"></i><span class="badge-count">${count}</span>`;
+                        existingCard.appendChild(badge);
+                    } else {
+                        badge.querySelector('.badge-count').textContent = count;
+                    }
+
+                    if (isFromPool) {
+                        const newCard = createStudentCard(number, name);
+                        sourceCard.parentNode.insertBefore(newCard, sourceCard);
+                        sourceCard.remove();
+                    } else {
+                        sourceCard.remove();
+                    }
+                    sortZoneCards(goodZone);
+                } else {
+                    if (isFromPool) {
+                        const newCard = createStudentCard(number, name);
+                        sourceCard.parentNode.insertBefore(newCard, sourceCard);
+                        moveCardToZone(sourceCard, targetZone);
+                    } else {
+                        moveCardToZone(sourceCard, targetZone);
+                    }
+                    // 【關鍵修改】預設次數徽章即刻顯示為 1
+                    sourceCard.setAttribute('data-count', '1');
+                    let badge = document.createElement('div');
+                    badge.className = "star-badge absolute -top-2.5 -right-2 bg-amber-400 border border-amber-300 text-amber-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
+                    badge.innerHTML = `<i class="fa-solid fa-star text-[8px] mr-0.5 text-amber-700"></i><span class="badge-count">1</span>`;
+                    sourceCard.appendChild(badge);
+                }
+            } else if (zoneType === 'bad') {
+                const existingCard = badZone.querySelector(`.student-card[data-number="${number}"][data-name="${name}"]`);
+                if (existingCard) {
+                    let count = parseInt(existingCard.getAttribute('data-count') || 1);
+                    count++;
+                    existingCard.setAttribute('data-count', count);
+                    
+                    let badge = existingCard.querySelector('.lightning-badge');
+                    if (!badge) {
+                        badge = document.createElement('div');
+                        badge.className = "lightning-badge absolute -top-2.5 -right-2 bg-yellow-400 border border-yellow-300 text-yellow-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
+                        badge.innerHTML = `<i class="fa-solid fa-bolt text-[8px] mr-0.5 text-yellow-700"></i><span class="badge-count">${count}</span>`;
+                        existingCard.appendChild(badge);
+                    } else {
+                        badge.querySelector('.badge-count').textContent = count;
+                    }
+
+                    if (isFromPool) {
+                        const newCard = createStudentCard(number, name);
+                        sourceCard.parentNode.insertBefore(newCard, sourceCard);
+                        sourceCard.remove();
+                    } else {
+                        sourceCard.remove();
+                    }
+                    sortZoneCards(badZone);
+                } else {
+                    if (isFromPool) {
+                        const newCard = createStudentCard(number, name);
+                        sourceCard.parentNode.insertBefore(newCard, sourceCard);
+                        moveCardToZone(sourceCard, targetZone);
+                    } else {
+                        moveCardToZone(sourceCard, targetZone);
+                    }
+                    // 【關鍵修改】預設次數徽章即刻顯示為 1
+                    sourceCard.setAttribute('data-count', '1');
+                    let badge = document.createElement('div');
+                    badge.className = "lightning-badge absolute -top-2.5 -right-2 bg-yellow-400 border border-yellow-300 text-yellow-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
+                    badge.innerHTML = `<i class="fa-solid fa-bolt text-[8px] mr-0.5 text-yellow-700"></i><span class="badge-count">1</span>`;
+                    sourceCard.appendChild(badge);
+                }
+            } else {
+                // 課間上廁所區 (水滴)
+                const existingCard = toiletZone.querySelector(`.student-card[data-number="${number}"][data-name="${name}"]`);
+                if (existingCard) {
+                    let count = parseInt(existingCard.getAttribute('data-count') || 1);
+                    count++;
+                    existingCard.setAttribute('data-count', count);
+                    
+                    let badge = existingCard.querySelector('.toilet-badge');
+                    if (!badge) {
+                        badge = document.createElement('div');
+                        badge.className = "toilet-badge absolute -top-2.5 -right-2 bg-sky-400 border border-sky-300 text-sky-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
+                        badge.innerHTML = `<i class="fa-solid fa-droplet text-[8px] mr-0.5 text-sky-700"></i><span class="badge-count">${count}</span>`;
+                        existingCard.appendChild(badge);
+                    } else {
+                        badge.querySelector('.badge-count').textContent = count;
+                    }
+
+                    if (isFromPool) {
+                        const newCard = createStudentCard(number, name);
+                        sourceCard.parentNode.insertBefore(newCard, sourceCard);
+                        sourceCard.remove();
+                    } else {
+                        sourceCard.remove();
+                    }
+                    sortZoneCards(toiletZone);
+                } else {
+                    if (isFromPool) {
+                        const newCard = createStudentCard(number, name);
+                        sourceCard.parentNode.insertBefore(newCard, sourceCard);
+                        moveCardToZone(sourceCard, targetZone);
+                    } else {
+                        moveCardToZone(sourceCard, targetZone);
+                    }
+                    // 【關鍵修改】預設次數徽章即刻顯示為 1
+                    sourceCard.setAttribute('data-count', '1');
+                    let badge = document.createElement('div');
+                    badge.className = "toilet-badge absolute -top-2.5 -right-2 bg-sky-400 border border-sky-300 text-sky-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
+                    badge.innerHTML = `<i class="fa-solid fa-droplet text-[8px] mr-0.5 text-sky-700"></i><span class="badge-count">1</span>`;
+                    sourceCard.appendChild(badge);
+                }
+            }
+
+            updateCounts();
+        }
+
+        // 12. 行動裝置觸控拖曳模擬器
+        function setupTouchDrag(card) {
+            let activeTouch = false;
+            let startX, startY;
+            let ghostNode = null;
+
+            card.addEventListener('touchstart', function(e) {
+                if (card.getAttribute('draggable') === 'false') return;
+                if (e.target.closest('.delete-btn') || e.target.closest('.group\\/circle')) return;
+                
+                activeTouch = true;
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+
+                ghostNode = card.cloneNode(true);
+                const delBtn = ghostNode.querySelector('.delete-btn');
+                if (delBtn) delBtn.remove();
+
+                ghostNode.style.position = 'fixed';
+                ghostNode.style.width = card.offsetWidth + 'px';
+                ghostNode.style.height = card.offsetHeight + 'px';
+                ghostNode.style.opacity = '0.85';
+                ghostNode.style.pointerEvents = 'none';
+                ghostNode.style.zIndex = '1000';
+                ghostNode.style.left = (touch.clientX - card.offsetWidth / 2) + 'px';
+                ghostNode.style.top = (touch.clientY - card.offsetHeight / 2) + 'px';
+                document.body.appendChild(ghostNode);
+
+                card.classList.add('dragging');
+            }, { passive: true });
+
+            card.addEventListener('touchmove', function(e) {
+                if (!activeTouch || !ghostNode) return;
+                const touch = e.touches[0];
+                
+                ghostNode.style.left = (touch.clientX - ghostNode.offsetWidth / 2) + 'px';
+                ghostNode.style.top = (touch.clientY - ghostNode.offsetHeight / 2) + 'px';
+
+                const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+                const targetZone = elementUnder ? elementUnder.closest('.drag-zone') : null;
+
+                document.querySelectorAll('.drag-zone').forEach(zone => {
+                    zone.classList.remove('dark-hover');
+                });
+                if (targetZone) {
+                    targetZone.classList.add('dark-hover');
+                }
+            }, { passive: true });
+
+            card.addEventListener('touchend', function(e) {
+                if (!activeTouch) return;
+                activeTouch = false;
+                
+                card.classList.remove('dragging');
+                if (ghostNode) {
+                    ghostNode.remove();
+                    ghostNode = null;
+                }
+
+                const touch = e.changedTouches[0];
+                const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+                const targetZone = elementUnder ? elementUnder.closest('.drag-zone') : null;
+
+                if (targetZone) {
+                    targetZone.classList.remove('drag-hover');
+                    const zoneType = targetZone.id === 'good-zone' ? 'good' : (targetZone.id === 'bad-zone' ? 'bad' : 'toilet');
+                    const number = card.getAttribute('data-number');
+                    const name = card.getAttribute('data-name');
+
+                    addStudentToZone(number, name, zoneType, card);
+                }
+
+                document.querySelectorAll('.drag-zone').forEach(zone => {
+                    zone.classList.remove('drag-hover');
+                });
+                updateCounts();
+            });
+        }
+
+        // 13. 即時人數統計
+        function updateCounts() {
+            const goodZone = document.getElementById('good-zone');
+            const badZone = document.getElementById('bad-zone');
+            const toiletZone = document.getElementById('toilet-zone');
+
+            const goodCards = goodZone.querySelectorAll('.student-card');
+            const badCards = badZone.querySelectorAll('.student-card');
+            const toiletCards = toiletZone.querySelectorAll('.student-card');
+
+            const uniqueGoodStudents = new Set();
+            goodCards.forEach(card => {
+                const number = card.getAttribute('data-number');
+                const name = card.getAttribute('data-name');
+                uniqueGoodStudents.add(`${number}-${name}`);
+            });
+
+            const uniqueBadStudents = new Set();
+            badCards.forEach(card => {
+                const number = card.getAttribute('data-number');
+                const name = card.getAttribute('data-name');
+                uniqueBadStudents.add(`${number}-${name}`);
+            });
+
+            const uniqueToiletStudents = new Set();
+            toiletCards.forEach(card => {
+                const number = card.getAttribute('data-number');
+                const name = card.getAttribute('data-name');
+                uniqueToiletStudents.add(`${number}-${name}`);
+            });
+
+            document.getElementById('good-count').textContent = `${uniqueGoodStudents.size} 人`;
+            document.getElementById('bad-count').textContent = `${uniqueBadStudents.size} 人`;
+            document.getElementById('toilet-count').textContent = `${uniqueToiletStudents.size} 人`;
+        }
+
+        // ==========================================
+        // 【技術核心】將當前表現紀錄傳送儲存至 Google Sheet 後端
+        // ==========================================
+        function saveRecordToSpreadsheet() {
+            // 1. 防呆防重複點擊：先將儲存按鈕設定為載入狀態，避免連續多重寫入
+            const btnSave = document.getElementById('btn-save-cloud');
+            const originalContent = btnSave.innerHTML;
+            btnSave.disabled = true;
+            btnSave.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 儲存傳送中...`;
+
+            // 2. 爬取三個專區內所有的學生卡片資訊 (名字與座號、次數)
+            const goodCards = document.getElementById('good-zone').querySelectorAll('.student-card');
+            const badCards = document.getElementById('bad-zone').querySelectorAll('.student-card');
+            const toiletCards = document.getElementById('toilet-zone').querySelectorAll('.student-card');
+
+            // 格式化為：[{name: "01號 洪叡軒", count: 2}]
+            let goodList = [];
+            goodCards.forEach(card => {
+                const num = card.getAttribute('data-number');
+                const name = card.getAttribute('data-name');
+                const count = card.getAttribute('data-count') || 1;
+                goodList.push({ name: `${num}號 ${name}`, count: parseInt(count) });
+            });
+
+            let badList = [];
+            badCards.forEach(card => {
+                const num = card.getAttribute('data-number');
+                const name = card.getAttribute('data-name');
+                const count = card.getAttribute('data-count') || 1;
+                badList.push({ name: `${num}號 ${name}`, count: parseInt(count) });
+            });
+
+            let toiletList = [];
+            toiletCards.forEach(card => {
+                const num = card.getAttribute('data-number');
+                const name = card.getAttribute('data-name');
+                const count = card.getAttribute('data-count') || 1;
+                toiletList.push({ name: `${num}號 ${name}`, count: parseInt(count) });
+            });
+
+            // 3. 建立發送數據結構包
+            const payload = {
+                good: goodList,
+                bad: badList,
+                toilet: toiletList
+            };
+
+            // 4. 使用 fetch 送出非同步 POST 請求至 GAS
+            fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8' // GAS doPost 常規接收 text 較不易觸發 CORS preflight
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 恢復儲存按鈕狀態
+                btnSave.disabled = false;
+                btnSave.innerHTML = originalContent;
+
+                if (data.status === 'success') {
+                    alertModalMessage("儲存成功！", data.message);
+                } else {
+                    alertModalMessage("儲存失敗", "後端發生錯誤: " + data.message);
+                }
+            })
+            .catch(error => {
+                // 恢復儲存按鈕狀態
+                btnSave.disabled = false;
+                btnSave.innerHTML = originalContent;
+
+                console.error("Error saving records:", error);
+                alertModalMessage("連線失敗", "請確認網頁第 310 行的「GAS_WEB_APP_URL」是否設定正確，或檢查網路連線狀態。");
+            });
+        }
+
+        // ==========================================
+        // 【計時模組】三區塊獨立計時器控制
+        // ==========================================
+
+        // 套用計時時間
+        function applyZoneTime(zone) {
+            pauseZoneTimer(zone);
+            const mins = parseInt(document.getElementById(`input-mins-${zone}`).value) || 0;
+            const secs = parseInt(document.getElementById(`input-secs-${zone}`).value) || 0;
+            
+            timers[zone].total = (mins * 60) + secs;
+            if (timers[zone].total <= 0) timers[zone].total = 10; // 保證非0
+            
+            timers[zone].remaining = timers[zone].total;
+            updateZoneTimerDisplay(zone);
+        }
+
+        // 更新計時器文字顯示 (MM:SS)
+        function updateZoneTimerDisplay(zone) {
+            const display = document.getElementById(`timer-display-${zone}`);
+            const mins = Math.floor(timers[zone].remaining / 60);
+            const secs = timers[zone].remaining % 60;
+            display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // 開始 / 暫停切換
+        function toggleZoneTimer(zone) {
+            if (timers[zone].running) {
+                pauseZoneTimer(zone);
+            } else {
+                startZoneTimer(zone);
+            }
+        }
+
+        // 啟動倒數
+        function startZoneTimer(zone) {
+            if (timers[zone].remaining <= 0) {
+                timers[zone].remaining = timers[zone].total;
+            }
+
+            timers[zone].running = true;
+            
+            const btn = document.getElementById(`btn-toggle-${zone}`);
+            const icon = document.getElementById(`icon-toggle-${zone}`);
+            const text = document.getElementById(`text-toggle-${zone}`);
+            
+            btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'bg-rose-500', 'hover:bg-rose-600', 'bg-sky-500', 'hover:bg-sky-600');
+            btn.classList.add('bg-amber-500', 'hover:bg-amber-600');
+            icon.className = "fa-solid fa-pause";
+            text.textContent = "暫停";
+
+            timers[zone].interval = setInterval(() => {
+                timers[zone].remaining--;
+                updateZoneTimerDisplay(zone);
+
+                if (timers[zone].remaining <= 0) {
+                    clearInterval(timers[zone].interval);
+                    zoneTimerTimeout(zone);
+                }
+            }, 1000);
+        }
+
+        // 暫停計時
+        function pauseZoneTimer(zone) {
+            timers[zone].running = false;
+            clearInterval(timers[zone].interval);
+            
+            const btn = document.getElementById(`btn-toggle-${zone}`);
+            const icon = document.getElementById('icon-toggle-' + zone);
+            const text = document.getElementById('text-toggle-' + zone);
+            
+            if (btn) btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+            
+            const defaultColor = zone === 'good' ? 'bg-emerald-500 hover:bg-emerald-600' : (zone === 'bad' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-sky-500 hover:bg-sky-600');
+            if (btn) btn.classList.add(...defaultColor.split(' '));
+            if (icon) icon.className = "fa-solid fa-play";
+            if (text) text.textContent = "開始";
+        }
+
+        // 重設計時
+        function resetZoneTimer(zone) {
+            pauseZoneTimer(zone);
+            timers[zone].remaining = timers[zone].total;
+            updateZoneTimerDisplay(zone);
+        }
+
+        // 計時器歸零處理：播放風鈴鐘聲，並開啟彈出視窗
+        function zoneTimerTimeout(zone) {
+            pauseZoneTimer(zone);
+            timers[zone].remaining = timers[zone].total;
+            updateZoneTimerDisplay(zone);
+
+            playSynthesizedBell();
+
+            let descText = "";
+            let colorClass = "";
+            let iconClass = "";
+            
+            if (zone === 'good') {
+                descText = "時間到！";
+                colorClass = "text-emerald-600";
+                iconClass = "fa-regular fa-face-laugh-beam";
+            } else if (zone === 'bad') {
+                descText = "時間到！";
+                colorClass = "text-rose-600";
+                iconClass = "fa-regular fa-face-sad-tear";
+            } else if (zone === 'toilet') {
+                descText = "時間到！";
+                colorClass = "text-sky-600";
+                iconClass = "fa-solid fa-restroom";
+            }
+            openAlertModal(descText, colorClass, iconClass, zone);
+        }
+
+        // 開啟提醒視窗 (Modal)
+        function openAlertModal(desc, colorClass, iconClass, zone) {
+            currentTimeoutZone = zone;
+            const modal = document.getElementById('alert-modal');
+            
+            const bellIcon = document.getElementById('alert-icon-bell');
+            if (bellIcon) {
+                bellIcon.className = "fa-solid fa-bell text-4xl text-amber-500";
+            }
+            
+            let timerMins = 0;
+            if (zone !== 'default') {
+                timerMins = parseInt(document.getElementById(`input-mins-${zone}`).value) || 0;
+            }
+
+            const descEl = modal.querySelector('p');
+            
+            if (zone === 'good') {
+                descEl.innerHTML = `<span class="flex items-center justify-center gap-2"><i class="fa-regular fa-face-laugh-beam"></i> ${timerMins}分鐘時間到！</span>`;
+            } else if (zone === 'bad') {
+                descEl.innerHTML = `<span class="flex items-center justify-center gap-2"><i class="fa-regular fa-face-sad-tear"></i> ${timerMins}分鐘時間到！</span>`;
+            } else if (zone === 'toilet') {
+                descEl.innerHTML = `<span class="flex items-center justify-center gap-2"><i class="fa-solid fa-restroom"></i> ${timerMins}分鐘時間到！</span>`;
+            } else {
+                descEl.textContent = desc;
+            }
+            
+            descEl.className = `text-xl md:text-2xl font-black mb-6 select-none transition-all duration-300 ${colorClass}`;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+                modal.querySelector('div').classList.add('scale-100');
+            }, 10);
+        }
+
+        // 關閉提醒視窗，並執行「自動消除該區學生」
+        function closeAlertModal() {
+            const modal = document.getElementById('alert-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                
+                if (currentTimeoutZone) {
+                    clearZoneAllCardsOnce(currentTimeoutZone);
+                    currentTimeoutZone = null;
+                }
+            }, 300);
+        }
+
+        // 銷單：自動扣減或消除指定表現區內全體學生的登記次數
+        function clearZoneAllCardsOnce(zone) {
+            const targetZone = document.getElementById(`${zone}-zone`);
+            const cards = Array.from(targetZone.querySelectorAll('.student-card'));
+
+            if (cards.length === 0) return;
+
+            cards.forEach(card => {
+                let count = parseInt(card.getAttribute('data-count') || 1);
+                if (count > 1) {
+                    count--;
+                    card.setAttribute('data-count', count);
+                    
+                    let badgeClass = zone === 'good' ? '.star-badge' : (zone === 'bad' ? '.lightning-badge' : '.toilet-badge');
+                    let badge = card.querySelector(badgeClass);
+                    if (badge) {
+                        if (count === 1) {
+                            badge.remove();
+                        } else {
+                            badge.querySelector('.badge-count').textContent = count;
+                        }
+                    }
+                } else {
+                    card.remove();
+                }
+            });
+
+            if (targetZone.querySelectorAll('.student-card').length === 0) {
+                const placeholder = targetZone.querySelector('.placeholder');
+                if (placeholder) {
+                    if (zone === 'good') {
+                        placeholder.className = "placeholder col-span-3 py-12 flex items-center justify-center text-emerald-400 text-xs text-center italic";
+                    }
+                    placeholder.style.display = 'flex';
+                }
+            }
+
+            updateCounts();
+        }
+
+        // 🎉 【BINGO慶祝特效】
+        function startConfetti() {
+            confettiActive = true;
+            const canvas = document.getElementById('celebration-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+            
+            confettiParticles = [];
+            for (let i = 0; i < 80; i++) {
+                confettiParticles.push(createConfettiParticle(canvas.width, canvas.height));
+            }
+            
+            function animate() {
+                if (!confettiActive) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                for (let i = 0; i < confettiParticles.length; i++) {
+                    let p = confettiParticles[i];
+                    p.y += p.velocity;
+                    p.rotation += p.rotationSpeed;
+                    
+                    ctx.save();
+                    ctx.fillStyle = p.color;
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation);
+                    ctx.fillRect(-p.width / 2, -p.height / 2, p.width, p.height);
+                    ctx.restore();
+                    
+                    if (p.y > canvas.height) {
+                        confettiParticles[i] = createConfettiParticle(canvas.width, 0);
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function createConfettiParticle(maxWidth, startY) {
+            return {
+                x: Math.random() * maxWidth,
+                y: startY === 0 ? -15 : Math.random() * startY,
+                width: Math.random() * 8 + 6,
+                height: Math.random() * 12 + 6,
+                color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+                velocity: Math.random() * 3 + 2,
+                rotation: Math.random() * Math.PI,
+                rotationSpeed: Math.random() * 0.1 - 0.05
+            };
+        }
+
+        function stopConfetti() {
+            confettiActive = false;
+        }
+
+        function checkStudentAllHomeworkCompleted(number, name) {
+            if (homeworkList.length === 0) return;
+            
+            let allCompleted = true;
+            for (let hw of homeworkList) {
+                const statusKey = `${number}-${name}_${hw}`;
+                if (homeworkStatus[statusKey] !== false) {
+                    allCompleted = false;
+                    break;
+                }
+            }
+            
+            if (allCompleted) {
+                triggerCelebration(number, name);
+            }
+        }
+
+        function triggerCelebration(number, name) {
+            const overlay = document.getElementById('celebration-overlay');
+            const studentInfo = document.getElementById('celebration-student-info');
+            studentInfo.textContent = `${number}號 ${name}`;
+            
+            playCelebrationSound();
+            
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+                overlay.querySelector('div').classList.remove('scale-90');
+                overlay.querySelector('div').classList.add('scale-100');
+            }, 10);
+            
+            startConfetti();
+        }
+
+        function closeCelebration() {
+            const overlay = document.getElementById('celebration-overlay');
+            overlay.classList.add('opacity-0');
+            overlay.querySelector('div').classList.remove('scale-100');
+            overlay.querySelector('div').classList.add('scale-90');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                stopConfetti();
+            }, 500);
+        }
+
+        function playCelebrationSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+                
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+                    
+                    gain.gain.setValueAtTime(0, now + idx * 0.12);
+                    gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.12 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.5);
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + idx * 0.12);
+                    osc.stop(now + idx * 0.12 + 0.5);
+                });
+            } catch (e) {
+                console.error("BINGO音效播放失敗: ", e);
+            }
+        }
+
+        function playSynthesizedBell() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+                
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(1318.51, now);
+                gain1.gain.setValueAtTime(0.3, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 1.0);
+
+                setTimeout(() => {
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(1046.50, ctx.currentTime);
+                    gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+                    osc2.start();
+                    osc2.stop(ctx.currentTime + 1.2);
+                }, 300);
+            } catch (e) {
+                console.error("風鈴聲播放失敗: ", e);
+            }
+        }
+
+        // ==========================================
+        // 【作業檢核模組】作業登記系統
+        // ==========================================
+
+        function addHomeworkItem() {
+            const input = document.getElementById('hw-name-input');
+            const hwName = input.value.trim();
+
+            if (!hwName) {
+                alertModalMessage("提示", "請輸入要新增的作業名稱！");
+                return;
+            }
+
+            if (homeworkList.includes(hwName)) {
+                alertModalMessage("重複作業", "已存在同名的作業項目囉！");
+                return;
+            }
+
+            homeworkList.push(hwName);
+            input.value = '';
+
+            renderHomeworkTable();
+        }
+
+        function deleteHomeworkItem(index) {
+            const removedHw = homeworkList[index];
+            homeworkList.splice(index, 1);
+
+            for (let key in homeworkStatus) {
+                if (key.endsWith(`_${removedHw}`)) {
+                    delete homeworkStatus[key];
+                }
+            }
+
+            renderHomeworkTable();
+        }
+
+        function toggleHwCell(number, name, hwName, cellElement) {
+            const statusKey = `${number}-${name}_${hwName}`;
+            const isUnfinished = homeworkStatus[statusKey] !== false; 
+
+            if (isUnfinished) {
+                homeworkStatus[statusKey] = false;
+                cellElement.className = "py-5 px-2.5 border-b border-r border-amber-100 bg-emerald-50 text-emerald-600 text-center font-bold text-lg cursor-pointer hover:bg-emerald-100 transition-colors select-none min-w-[48px] max-w-[48px] align-middle";
+                cellElement.innerHTML = `<i class="fa-solid fa-check scale-110"></i>`;
+                
+                checkStudentAllHomeworkCompleted(number, name);
+            } else {
+                homeworkStatus[statusKey] = true;
+                cellElement.className = "py-5 px-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-lg cursor-pointer hover:bg-rose-200 transition-colors select-none min-w-[48px] max-w-[48px] align-middle";
+                cellElement.innerHTML = `<i class="fa-solid fa-xmark scale-110"></i>`;
+            }
+        }
+
+        function renderHomeworkTable() {
+            const tableHeader = document.getElementById('hw-table-header');
+            const tableBody = document.getElementById('hw-table-body');
+
+            tableHeader.innerHTML = `
+                <th class="py-6 px-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-lg text-center align-middle">
+                    登記
+                </th>
+            `;
+
+            studentsList.forEach(student => {
+                const th = document.createElement('th');
+                th.className = "p-1 border-b border-r border-amber-200/80 min-w-[48px] max-w-[48px] bg-amber-100/30 text-[#78350f] font-bold text-center align-middle";
+                
+                const isEven = parseInt(student.number) % 2 === 0;
+                const bgClass = isEven ? 'bg-amber-100 text-amber-900' : 'bg-orange-100 text-orange-900';
+                
+                th.innerHTML = `
+                    <div class="flex flex-col items-center justify-center gap-1.5 h-[120px] py-3 mx-auto">
+                        <span class="w-7 h-7 flex items-center justify-center rounded-full text-sm font-black ${bgClass} shrink-0 shadow-sm">${student.number}</span>
+                        <span class="vertical-header text-lg tracking-wide font-bold leading-none">${student.name}</span>
+                    </div>
+                `;
+                tableHeader.appendChild(th);
+            });
+
+            if (studentsList.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td class="p-10 text-gray-400 italic text-center" colspan="100%">
+                            <i class="fa-solid fa-circle-info mr-1"></i> 請先至上方「學生資訊管理」匯入班級學生名單。
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            if (homeworkList.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td class="p-10 text-gray-400 italic text-center" colspan="100%">
+                            <i class="fa-solid fa-folder-open mr-1 block text-2xl mb-1 text-amber-400"></i>
+                            目前作業項目為空。請在上方打字並點擊「新增作業」按鈕，即可開始登記收繳情形！
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = '';
+
+            homeworkList.forEach((hw, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-amber-50/40 transition-colors";
+
+                const hwTd = document.createElement('td');
+                hwTd.className = "py-5 px-2.5 border-b border-r border-amber-200 bg-white font-semibold text-[#78350f] sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)] group min-w-[100px] text-center align-middle";
+                hwTd.innerHTML = `
+                    <div class="flex items-center justify-center gap-1.5 px-1 relative w-full h-full">
+                        <span class="truncate text-lg font-bold mx-auto" title="${hw}">${hw}</span>
+                        <button onclick="deleteHomeworkItem(${idx})" class="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 text-xs shrink-0 absolute right-1.5" title="刪除此作業">
+                            <i class="fa-solid fa-circle-xmark text-sm"></i>
+                        </button>
+                    </div>
+                `;
+                tr.appendChild(hwTd);
+
+                studentsList.forEach(student => {
+                    const cellTd = document.createElement('td');
+                    const statusKey = `${student.number}-${student.name}_${hw}`;
+                    
+                    let finalUnfinished = homeworkStatus[student.number + '-' + student.name + '_' + hw] !== false;
+
+                    if (finalUnfinished) {
+                        cellTd.className = "py-5 px-2.5 border-b border-r border-amber-100 bg-rose-100 text-rose-600 text-center font-bold text-lg cursor-pointer hover:bg-rose-200 transition-colors select-none min-w-[48px] max-w-[48px] align-middle";
+                        cellTd.innerHTML = `<i class="fa-solid fa-xmark scale-110"></i>`;
+                    } else {
+                        cellTd.className = "py-5 px-2.5 border-b border-r border-amber-100 bg-emerald-50 text-emerald-600 text-center font-bold text-lg cursor-pointer hover:bg-emerald-100 transition-colors select-none min-w-[48px] max-w-[48px] align-middle";
+                        cellTd.innerHTML = `<i class="fa-solid fa-check scale-110"></i>`;
+                    }
+
+                    cellTd.onclick = function() {
+                        toggleHwCell(student.number, student.name, hw, cellTd);
+                    };
+
+                    tr.appendChild(cellTd);
+                });
+
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // ==========================================
+        // 【介面微調】切換日夜間/午休主題
+        // ==========================================
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('theme-toggle-btn');
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const isDark = body.classList.toggle('dark-mode');
+
+            if (isDark) {
+                icon.className = "fa-solid fa-sun text-yellow-400 text-sm md:text-base animate-spin-slow";
+                text.textContent = "日間正常模式";
+                btn.style.backgroundColor = "rgba(30, 41, 59, 0.95)";
+                btn.style.color = "#f1f5f9";
+            } else {
+                icon.className = "fa-solid fa-moon text-amber-500 text-sm md:text-base animate-pulse";
+                text.textContent = "午休夜間模式";
+                btn.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+                btn.style.color = "#374151";
+            }
+        }
+
+        // ==========================================
+        // 【時鐘模組】台北標準時間時鐘
+        // ==========================================
+        function updateUTClock() {
+            const clockEl = document.getElementById('utc-clock');
+            if (!clockEl) return;
+
+            const now = new Date();
+            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const taipeiTime = new Date(utcTime + (3600000 * 8));
+
+            const year = taipeiTime.getFullYear();
+            const month = String(taipeiTime.getMonth() + 1).padStart(2, '0');
+            const date = String(taipeiTime.getDate()).padStart(2, '0');
+            const hours = String(taipeiTime.getHours()).padStart(2, '0');
+            const minutes = String(taipeiTime.getMinutes()).padStart(2, '0');
+            const seconds = String(taipeiTime.getSeconds()).padStart(2, '0');
+            
+            const daysArr = ["日", "一", "二", "三", "四", "五", "六"];
+            const dayOfWeek = daysArr[taipeiTime.getDay()];
+
+            clockEl.textContent = `${year}年${month}月${date}日 (週${dayOfWeek}) ${hours}:${minutes}:${seconds}`;
+        }
+
+        // 自訂一般警示視窗 fallback 顯示
+        function alertModalMessage(title, message) {
+            openAlertModal(message, 'text-amber-600', 'fa-solid fa-circle-info', 'default');
+        }
+
+        // 15. 初始化頁面載入與預設配置
+        window.onload = function() {
+            loadDemoStudents();
+
+            applyZoneTime('good');
+            applyZoneTime('bad');
+            applyZoneTime('toilet');
+
+            updateUTClock();
+            setInterval(updateUTClock, 1000);
+        }
+    </script>
+</body>
+</html>
