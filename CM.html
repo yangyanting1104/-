@@ -231,6 +231,7 @@
             color: #38bdf8 !important;
         }
 
+        /* 優化夜間模式下星星、閃電與水滴累計次數徽章的色調 */
         body.dark-mode .star-badge {
             background-color: #d97706 !important;
             border-color: #f59e0b !important;
@@ -260,9 +261,13 @@
         body.dark-mode .tab-inactive-dark:hover {
             background-color: #2d364f !important;
         }
+
+        /* ==========================================
+           【關鍵修改】夜間模式下專區名牌座號圓圈（微互動組件）在 hover 狀態下的暗灰色系反白
+           ========================================== */
         body.dark-mode .group\/circle:hover {
             background-color: #334155 !important;
-            color: #fb7185 !important;
+            color: #fb7185 !important; /* 懸停時夜間變身成玫瑰粉紅垃圾桶，醒目好按 */
         }
     </style>
 </head>
@@ -290,16 +295,17 @@
             <i class="fa-solid fa-graduation-cap text-[#f59e0b]"></i>
             班級經營互動看板
         </h1>
-        <p class="text-gray-500 text-xs md:text-[12px]">互動式行為表現與作業檢核系統</p>
+        <p class="text-gray-500 text-xs md:text-[12px]">　　互動式行為表現與作業檢核系統</p>
     </header>
 
     <!-- Main Grid Section -->
     <!-- 將左右主要欄位的比例改為 3.2:8.8 -->
     <main class="grid grid-cols-1 lg:grid-cols-[3.2fr_8.8fr] gap-5 lg:h-[600px] shrink-0 min-h-0 mb-6">
         
-        <!-- Left Column: Student List Area -->
+        <!-- Left Column: Student List Area (學生資訊管理 - 佔 3.2 比例) -->
         <section class="flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0">
+                <!-- 「學生資訊管理」標題 -->
                 <h2 class="text-lg font-bold text-[#78350f] mb-3 flex items-center justify-between shrink-0 border-b border-amber-100 pb-2">
                     <span class="flex items-center gap-2">
                         <i class="fa-solid fa-users text-[#d97706]"></i>
@@ -307,10 +313,10 @@
                     </span>
                 </h2>
                 
-                <!-- 內部 3:7 比例 -->
+                <!-- 內部重構為 3:7 比例 (即 lg:grid-cols-[3fr_7fr]，使最左側控制台精細縮減，名牌區得到大幅延伸) -->
                 <div class="grid grid-cols-1 lg:grid-cols-[3fr_7fr] gap-4 flex-grow min-h-0">
                     
-                    <!-- 第一欄：控制台 -->
+                    <!-- 第一欄：控制台 (Excel匯入、手動貼上/範例、輸入框、總人數統計) - 佔 30% 內部寬度 -->
                     <div class="flex flex-col gap-3 justify-between h-full overflow-y-auto pr-1">
                         <div class="space-y-3">
                             <!-- Excel 匯入按鈕 -->
@@ -330,13 +336,14 @@
                                 </div>
                                 <textarea id="text-input" class="w-full text-xs p-1.5 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white/70 mb-1.5 h-[300px] resize-none leading-normal" placeholder="格式：&#13;01 洪叡軒&#13;02 何聿倫"></textarea>
                                 
+                                <!-- 解析並生成按鈕 -->
                                 <button onclick="generateFromText()" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold py-1.5 px-1.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-0.5">
                                     <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> 生成名牌
                                 </button>
                             </div>
                         </div>
 
-                        <!-- 自動彙整人數統計 -->
+                        <!-- 自動彙整人數統計 (居於左下) -->
                         <div class="border-t border-amber-100 pt-2.5 mt-auto shrink-0 text-center">
                             <p class="text-[10px] text-gray-400 font-medium">班級人數統計</p>
                             <div id="left-student-count" class="text-sm font-black text-amber-800 bg-amber-100/60 rounded-xl py-0.5 mt-0.5 select-none">
@@ -345,12 +352,14 @@
                         </div>
                     </div>
 
-                    <!-- 第二欄及第三欄：學生名牌區 -->
+                    <!-- 第二欄及第三欄（合併）：學生名牌放置區 - 佔 70% 內部寬度 -->
                     <div class="flex flex-col h-full min-h-0 bg-amber-50/30 border border-amber-100 rounded-xl p-2.5">
+                        <!-- 標題文字為「學生名牌」 -->
                         <div class="text-sm font-bold text-[#78350f] mb-2 flex items-center justify-between shrink-0">
                             <span><i class="fa-solid fa-grip text-amber-500 mr-1"></i>學生名牌</span>
                             <span class="text-[10px] text-gray-400 font-normal">可拖曳或使用邊角按鈕點擊</span>
                         </div>
+                        <!-- 容器改為裝格的雙欄顯示 (grid-cols-2) -->
                         <div id="student-pool" class="grid grid-cols-2 gap-1.5 overflow-y-auto flex-grow min-h-0 pr-1">
                             <div class="col-span-full py-12 text-center text-gray-400 text-xs">
                                 <i class="fa-solid fa-arrow-left text-lg mb-2 block animate-bounce"></i>
@@ -363,7 +372,7 @@
             </div>
         </section>
 
-        <!-- Right Column: Performance Zones Area -->
+        <!-- Right Column: Performance Zones Area (表現紀錄區 - 佔 8.8 比例) -->
         <section class="flex flex-col h-full min-h-0">
             <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col h-full min-h-0 gap-3">
                 <h2 class="text-lg font-bold text-[#78350f] shrink-0 flex items-center justify-between">
@@ -371,30 +380,33 @@
                         <i class="fa-solid fa-star text-amber-500"></i>
                         表現記錄區
                     </span>
-                    <!-- 【關鍵修改】在右上角新增精美儲存按鈕 -->
+                    <!-- 在右上角新增精美儲存按鈕 -->
                     <button id="btn-save-cloud" onclick="saveRecordToSpreadsheet()" class="bg-amber-600 hover:bg-emerald-600 text-white font-extrabold text-xs py-1.5 px-4 rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5">
                         <i class="fa-solid fa-cloud-arrow-up"></i> 儲存今日紀錄
                     </button>
                 </h2>
 
-                <!-- 三分小區：欄位比例為 58% : 21% : 21% -->
+                <!-- 三分小區左右橫向排列：欄位比例精確設定為 58% : 21% : 21% -->
                 <div class="flex flex-col md:flex-row gap-4 flex-grow min-h-0 w-full">
                     
-                    <!-- 1. 好表現區 — 58% -->
+                    <!-- 1. 好表現區 (翠綠色系) — 寬度佔比 58% -->
                     <div class="bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between w-full md:w-[58%]">
+                        <!-- 標題字體大小改為 sm -->
                         <div class="flex items-center gap-1.5 mb-1.5 text-emerald-700 font-bold border-b border-emerald-100 pb-1.5 shrink-0 text-lg">
                             <i class="fa-regular fa-face-laugh-beam text-lg text-emerald-500"></i>
                             <span>好表現區</span>
                             <span id="good-count" class="ml-auto text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
                         
+                        <!-- 學生方塊放置區設定為三欄 Grid -->
+                        <!-- 說明改為「拖曳名牌/點擊名牌左側笑臉新增至此」 -->
                         <div id="good-zone" class="drag-zone flex-grow overflow-y-auto grid grid-cols-3 gap-2 p-1 min-h-0 rounded-xl transition-all items-start justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'good')">
                             <div class="placeholder col-span-3 py-12 flex items-center justify-center text-emerald-400 text-xs text-center italic">
                                 拖曳名牌/點擊名牌左側笑臉新增至此
                             </div>
                         </div>
 
-                        <!-- 獨立計時器 (預設5分鐘) -->
+                        <!-- 專區下方獨立計時器 (預設5分鐘) -->
                         <div class="border-t border-emerald-100/70 pt-2.5 mt-2 shrink-0 bg-white/40 dark:bg-slate-900/20 p-2 rounded-xl">
                             <div class="flex items-center justify-center gap-1 text-[10px] mb-1.5 font-medium">
                                 <span class="text-emerald-800 dark:text-emerald-300">設定：</span>
@@ -420,19 +432,22 @@
 
                     <!-- 2. 待改進區 — 21% -->
                     <div class="bg-rose-50/50 border-2 border-rose-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between w-full md:w-[21%]">
+                        <!-- 標題字體大小改為 sm -->
                         <div class="flex items-center gap-1.5 mb-1.5 text-rose-700 font-bold border-b border-rose-100 pb-1.5 shrink-0 text-lg">
                             <i class="fa-regular fa-face-sad-tear text-lg text-rose-500"></i>
                             <span>待改進區</span>
                             <span id="bad-count" class="ml-auto text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
                         
+                        <!-- 學生方塊放置區：維持單欄 (flex flex-col) 排列 -->
+                        <!-- 說明改為「拖曳名牌/點擊名牌右側哭臉新增至此」 -->
                         <div id="bad-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-1 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'bad')">
                             <div class="placeholder py-12 flex items-center justify-center text-rose-400 text-xs text-center italic">
                                 拖曳名牌/點擊名牌右側哭臉新增至此
                             </div>
                         </div>
 
-                        <!-- 獨立計時器 (預設4分鐘) -->
+                        <!-- 專區下方獨立計時器 (預設4分鐘) -->
                         <div class="border-t border-rose-100/70 pt-2.5 mt-2 shrink-0 bg-white/40 dark:bg-slate-900/20 p-2 rounded-xl">
                             <div class="flex items-center justify-center gap-1 text-[10px] mb-1.5 font-medium">
                                 <span class="text-rose-800 dark:text-rose-300">設定:</span>
@@ -456,21 +471,24 @@
                         </div>
                     </div>
 
-                    <!-- 3. 課間上廁所區 — 21% -->
+                    <!-- 3. 課間上廁所區 (湖水藍色系，預設2分鐘) — 寬度佔比 21% -->
                     <div class="bg-sky-50/50 border-2 border-sky-100 rounded-2xl p-3 flex flex-col min-h-0 h-full justify-between w-full md:w-[21%]">
+                        <!-- 課間上廁所區標題字體大小改為 lg -->
                         <div class="flex items-center gap-1.5 mb-1.5 text-sky-700 font-bold border-b border-sky-100 pb-1.5 shrink-0 text-lg">
                             <i class="fa-solid fa-restroom text-lg text-sky-500"></i>
                             <span>課間上廁所</span>
                             <span id="toilet-count" class="ml-auto text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded-full">0 人</span>
                         </div>
                         
+                        <!-- 學生方塊放置區：維持單欄 (flex flex-col) 排列 -->
+                        <!-- 說明改為「拖曳名牌至此」 -->
                         <div id="toilet-zone" class="drag-zone flex-grow overflow-y-auto flex flex-col gap-2 p-1 min-h-0 rounded-xl transition-all items-center justify-start content-start" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'toilet')">
                             <div class="placeholder py-12 flex items-center justify-center text-sky-400 text-xs text-center italic">
                                 拖曳名牌至此
                             </div>
                         </div>
 
-                        <!-- 獨立計時器 (預設2分鐘) -->
+                        <!-- 專區下方獨立計時器 (預設2分鐘) -->
                         <div class="border-t border-sky-100/70 pt-2.5 mt-2 shrink-0 bg-white/40 dark:bg-slate-900/20 p-2 rounded-xl">
                             <div class="flex items-center justify-center gap-1 text-[10px] mb-1.5 font-medium">
                                 <span class="text-sky-800 dark:text-sky-300">設定：</span>
@@ -502,11 +520,14 @@
     <!-- 下方第四區塊：作業檢核區 -->
     <section class="w-full shrink-0">
         <div class="glass-panel rounded-2xl p-5 shadow-sm flex flex-col bg-white/90">
+            <!-- 標題與說明 -->
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 pb-3 border-b border-amber-100">
+                <!-- 區塊標題 -->
                 <h2 class="text-xl font-bold text-[#78350f] flex items-center gap-2">
                     <i class="fa-solid fa-clipboard-check text-amber-600"></i>
                     作業檢核區
                 </h2>
+                <!-- 新增作業輸入列 -->
                 <div class="flex items-center gap-2 bg-amber-50 p-1.5 rounded-xl border border-amber-100 max-w-lg w-full">
                     <input type="text" id="hw-name-input" placeholder="請打字輸入作業名稱 (例如：國習、數單)" class="flex-grow text-sm bg-white border border-amber-200 rounded-lg py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
                     <button onclick="addHomeworkItem()" class="bg-amber-500 hover:bg-emerald-600 text-white font-bold text-sm py-1.5 px-4 rounded-lg transition-all shadow-sm shrink-0">
@@ -515,14 +536,18 @@
                 </div>
             </div>
 
+            <!-- 作業表格呈現區 -->
             <div class="overflow-x-auto w-full border border-amber-100 rounded-xl bg-amber-50/10">
                 <table class="w-full border-collapse text-center">
                     <thead>
                         <tr id="hw-table-header" class="bg-amber-100/50 text-[#78350f] font-bold text-sm">
+                            <!-- 首欄表頭「登記」欄位字體為 text-lg -->
                             <th class="py-6 px-3 border-b border-r border-amber-200/80 min-w-[100px] sticky left-0 bg-amber-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.02)] text-[#78350f] font-bold text-lg text-center align-middle">登記</th>
+                            <!-- 動態生成的學生座號+姓名欄位會插在這裡 -->
                         </tr>
                     </thead>
                     <tbody id="hw-table-body" class="divide-y divide-amber-90 text-xs md:text-sm">
+                        <!-- 動態生成的作業列與核取儲格會在這裡呈現 -->
                         <tr>
                             <td class="p-8 text-gray-400 italic text-center" colspan="100%">
                                 <i class="fa-solid fa-circle-info mr-1"></i> 請先至上方匯入學生名單，並於右上角輸入作業名稱以啟用檢核表格。
@@ -532,6 +557,7 @@
                 </table>
             </div>
             
+            <!-- 色塊顏色狀態圖例說明 -->
             <div class="flex gap-4 items-center justify-end mt-3 text-xs text-gray-500">
                 <span class="flex items-center gap-1">
                     <span class="w-4 h-4 rounded bg-rose-100 border border-rose-300 inline-block text-center text-[10px] text-rose-600 leading-none">✗</span>
@@ -591,7 +617,7 @@
         // 📢 【雁婷老師請注意：雲端試算表串接設定】
         // 請將下方引號內的網址，更換為您部署 GAS 網路應用程式後產生的「網頁應用程式 URL」！
         // ========================================================
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwdmFshgeMqMujqYpCdbNv0zEyhxynz5va43_1Nr0D97sJQ8XVSK1QNSGD_tYyqWBqf/exec";
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbySiJ022X1lSPLOAnsTA5O5NQOCy8pDp7U9oEvDi4MmcRF9Cl002mCUvvgIF18wpCT_/exec";
 
 
         // 1. 初始化資料與狀態
@@ -828,7 +854,8 @@
                     <i class="fa-regular fa-face-laugh-beam text-xs"></i>
                 </button>
                 
-                <span class="w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold ${bgClass} shrink-0 shadow-sm transition-all">
+                <!-- 圓圈尺寸修改為標準正圓比例 w-5 h-5，字體調整為完美比例 text-[10px] 粗體 -->
+                <span class="w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-extrabold ${bgClass} shrink-0 shadow-sm transition-all">
                     ${number}
                 </span>
                 
@@ -875,10 +902,9 @@
                 let badgeClass = zoneId === 'good' ? '.star-badge' : (zoneId === 'bad' ? '.lightning-badge' : '.toilet-badge');
                 let badge = card.querySelector(badgeClass);
                 if (badge) {
-                    if (count === 1) {
-                        badge.remove();
-                    } else {
-                        badge.querySelector('.badge-count').textContent = count;
+                    const badgeCountEl = badge.querySelector('.badge-count');
+                    if (badgeCountEl) {
+                        badgeCountEl.textContent = count; // 直接將顯示的次數數字更新為 1 (不再 remove 徽章)
                     }
                 }
             } else {
@@ -904,27 +930,36 @@
                 placeholder.style.display = 'none';
             }
             
+            // 獲取該卡片的座號與奇偶數狀態，用於生成對應的平時粉彩背景
             const number = card.getAttribute('data-number');
             const isEven = parseInt(number, 10) % 2 === 0;
             const bgClass = isEven ? 'bg-amber-50 text-amber-800' : 'bg-orange-50 text-orange-900';
             
+            // 移除原本的預備區緊湊樣式
             card.classList.remove('py-1.5', 'px-1.5', 'text-xs', 'justify-center');
+            
+            // 套用大尺寸、在看板專區置中的名牌樣式
             card.className = "student-card bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md py-2 px-3 text-base md:text-lg rounded-xl shadow-sm w-40 h-10 shrink-0 mx-auto flex items-center justify-center gap-2.5 group relative transition-all duration-300";
 
+            // 鎖定狀態：移入表現區後不允許二次拖曳
             card.setAttribute('draggable', 'false');
             card.classList.remove('cursor-grab', 'active:cursor-grabbing');
             card.classList.add('cursor-default');
 
+            // 清理原有的快捷笑臉/哭臉分發按鈕
             const leftBtn = card.querySelector('.quick-btn-left'); if (leftBtn) leftBtn.remove();
             const rightBtn = card.querySelector('.quick-btn-right'); if (rightBtn) rightBtn.remove();
 
+            // 座號圓圈放大邏輯：平時保留對齊原本奇偶數背景色的繽紛底色，滑鼠移過去時才漸變成灰色垃圾桶
             const numSpan = card.querySelector('span:first-child');
             if (numSpan) {
+                // 平時保持 bgClass 樣式，只有在懸停時變成灰色背景（hover:bg-stone-200）並顯示垃圾桶
                 numSpan.className = `w-7 h-7 rounded-full flex items-center justify-center text-sm font-black shrink-0 shadow-sm transition-all cursor-pointer relative ${bgClass} hover:bg-stone-200 hover:text-stone-600 dark:hover:bg-slate-700 dark:hover:text-slate-200 group/circle z-10`;
                 numSpan.innerHTML = `
                     <span class="group-hover/circle:hidden select-none">${number}</span>
                     <i class="fa-regular fa-trash-can hidden group-hover/circle:block text-xs"></i>
                 `;
+                // 綁定點擊事件以消除/收回
                 numSpan.onclick = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -945,6 +980,7 @@
                 nameSpan.classList.add('font-bold', 'truncate');
             }
 
+            // 安全清理：徹底移去原本右側產生的懸浮 delete-btn，改由座號圓圈一體化代勞
             const deleteBtn = card.querySelector('.delete-btn');
             if (deleteBtn) deleteBtn.remove();
 
@@ -1000,7 +1036,7 @@
                     } else {
                         moveCardToZone(sourceCard, targetZone);
                     }
-                    // 【關鍵修改】預設次數徽章即刻顯示為 1
+                    // 預設次數徽章即刻顯示為 1
                     sourceCard.setAttribute('data-count', '1');
                     let badge = document.createElement('div');
                     badge.className = "star-badge absolute -top-2.5 -right-2 bg-amber-400 border border-amber-300 text-amber-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
@@ -1040,7 +1076,7 @@
                     } else {
                         moveCardToZone(sourceCard, targetZone);
                     }
-                    // 【關鍵修改】預設次數徽章即刻顯示為 1
+                    // 預設次數徽章即刻顯示為 1
                     sourceCard.setAttribute('data-count', '1');
                     let badge = document.createElement('div');
                     badge.className = "lightning-badge absolute -top-2.5 -right-2 bg-yellow-400 border border-yellow-300 text-yellow-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
@@ -1081,7 +1117,7 @@
                     } else {
                         moveCardToZone(sourceCard, targetZone);
                     }
-                    // 【關鍵修改】預設次數徽章即刻顯示為 1
+                    // 預設次數徽章即刻顯示為 1
                     sourceCard.setAttribute('data-count', '1');
                     let badge = document.createElement('div');
                     badge.className = "toilet-badge absolute -top-2.5 -right-2 bg-sky-400 border border-sky-300 text-sky-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse z-10";
@@ -1213,18 +1249,15 @@
         // 【技術核心】將當前表現紀錄傳送儲存至 Google Sheet 後端
         // ==========================================
         function saveRecordToSpreadsheet() {
-            // 1. 防呆防重複點擊：先將儲存按鈕設定為載入狀態，避免連續多重寫入
             const btnSave = document.getElementById('btn-save-cloud');
             const originalContent = btnSave.innerHTML;
             btnSave.disabled = true;
             btnSave.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 儲存傳送中...`;
 
-            // 2. 爬取三個專區內所有的學生卡片資訊 (名字與座號、次數)
             const goodCards = document.getElementById('good-zone').querySelectorAll('.student-card');
             const badCards = document.getElementById('bad-zone').querySelectorAll('.student-card');
             const toiletCards = document.getElementById('toilet-zone').querySelectorAll('.student-card');
 
-            // 格式化為：[{name: "01號 洪叡軒", count: 2}]
             let goodList = [];
             goodCards.forEach(card => {
                 const num = card.getAttribute('data-number');
@@ -1249,24 +1282,21 @@
                 toiletList.push({ name: `${num}號 ${name}`, count: parseInt(count) });
             });
 
-            // 3. 建立發送數據結構包
             const payload = {
                 good: goodList,
                 bad: badList,
                 toilet: toiletList
             };
 
-            // 4. 使用 fetch 送出非同步 POST 請求至 GAS
             fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'text/plain;charset=utf-8' // GAS doPost 常規接收 text 較不易觸發 CORS preflight
+                    'Content-Type': 'text/plain;charset=utf-8'
                 },
                 body: JSON.stringify(payload)
             })
             .then(response => response.json())
             .then(data => {
-                // 恢復儲存按鈕狀態
                 btnSave.disabled = false;
                 btnSave.innerHTML = originalContent;
 
@@ -1277,12 +1307,11 @@
                 }
             })
             .catch(error => {
-                // 恢復儲存按鈕狀態
                 btnSave.disabled = false;
                 btnSave.innerHTML = originalContent;
 
                 console.error("Error saving records:", error);
-                alertModalMessage("連線失敗", "請確認網頁第 310 行的「GAS_WEB_APP_URL」是否設定正確，或檢查網路連線狀態。");
+                alertModalMessage("連線失敗", "請確認網頁中的「GAS_WEB_APP_URL」是否設定正確，或檢查網路連線狀態。");
             });
         }
 
@@ -1470,10 +1499,9 @@
                     let badgeClass = zone === 'good' ? '.star-badge' : (zone === 'bad' ? '.lightning-badge' : '.toilet-badge');
                     let badge = card.querySelector(badgeClass);
                     if (badge) {
-                        if (count === 1) {
-                            badge.remove();
-                        } else {
-                            badge.querySelector('.badge-count').textContent = count;
+                        const badgeCountEl = badge.querySelector('.badge-count');
+                        if (badgeCountEl) {
+                            badgeCountEl.textContent = count;
                         }
                     }
                 } else {
@@ -1513,7 +1541,7 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
                 for (let i = 0; i < confettiParticles.length; i++) {
-                    let p = confettiParticles[i];
+                    let p = confettiParticles;
                     p.y += p.velocity;
                     p.rotation += p.rotationSpeed;
                     
@@ -1533,6 +1561,7 @@
             requestAnimationFrame(animate);
         }
 
+        // 輔助粒子
         function createConfettiParticle(maxWidth, startY) {
             return {
                 x: Math.random() * maxWidth,
@@ -1544,10 +1573,6 @@
                 rotation: Math.random() * Math.PI,
                 rotationSpeed: Math.random() * 0.1 - 0.05
             };
-        }
-
-        function stopConfetti() {
-            confettiActive = false;
         }
 
         function checkStudentAllHomeworkCompleted(number, name) {
@@ -1729,6 +1754,7 @@
                 const isEven = parseInt(student.number) % 2 === 0;
                 const bgClass = isEven ? 'bg-amber-100 text-amber-900' : 'bg-orange-100 text-orange-900';
                 
+                // 直書姓名大小設為 text-lg；並將座號圓圈的大小修改為 w-7 h-7 且字體為 text-sm font-black。
                 th.innerHTML = `
                     <div class="flex flex-col items-center justify-center gap-1.5 h-[120px] py-3 mx-auto">
                         <span class="w-7 h-7 flex items-center justify-center rounded-full text-sm font-black ${bgClass} shrink-0 shadow-sm">${student.number}</span>
